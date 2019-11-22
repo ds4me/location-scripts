@@ -31,8 +31,8 @@ def updateWay(osmApi, osmId, subvillId, subvillName, sourceTag):
 
 # TODO: Change these values depending on who is editing, what they're editing,
 # where the masterlist is located, and what you want the source tag to be
-OSM_USERNAME = "elijahfilip@gmail.com"
-OSM_PASSWORD = "Xh2^2pO%3OqT"
+OSM_USERNAME = ""
+OSM_PASSWORD = ""
 CHANGESET_DESCRIPTION = "Fixed all name and source tags, added subvillage_id to description to Ubon A1A2 foci"
 MASTERLIST_LOCATION = "C:/Users/MM-PC0L6BTX/Desktop/a1a2_2020_ubon.xlsx"
 SOURCE_TAG = "BVBDMAY2019"
