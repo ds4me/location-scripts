@@ -1,1 +1,14 @@
 reveal_upload/config/config.ini
+lists/*
+reveal_upload/archive/*
+reveal_upload/imported/*.json
+reveal_upload/imported/*.geojson
+reveal_upload/toimport/geojson/*.json
+reveal_upload/toimport/geojson/*.geojson
+reveal_upload/toimport/geojson/*.csv
+reveal_upload/toimport/locations/*.json
+reveal_upload/toimport/locations/*.geojson
+reveal_upload/toimport/locations/*.csv
+
+
+
