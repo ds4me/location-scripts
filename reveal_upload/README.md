@@ -1,4 +1,4 @@
-
+DRAFT
 
 - get the production locations 
    At present this involves logging into a remote machine, running the materialize_view script on the production opensrp database and then scp-ing the files to the local server

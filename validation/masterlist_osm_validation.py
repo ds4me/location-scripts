@@ -15,10 +15,10 @@ import numpy as np
 
 # TODO: Change these values based on the location of the files. Note that there
 # must be separate "lat" and "long" columns in the master list
-OSM_QUERY_LOCATION = "C:/Users/elija/Desktop/overpass_query/osm.shp"
-MASTERLIST_LOCATION = "C:/Users/elija/Desktop/2019_a1a2.xlsx"
-SUBDISTRICT_SHAPEFILE_LOCATION = "C:/Users/elija/Desktop/overpass_query/Thai Boundary/Subdistrict_region.shp"
-FINAL_FILE_LOCATION = "C:/Users/elija/Desktop/validation_output.xlsx"
+OSM_QUERY_LOCATION = "C:/Users/MM-PC0L6BTX/Desktop/Misc Thai Foci/osm_query/osm.shp"
+MASTERLIST_LOCATION = "C:/Users/MM-PC0L6BTX/Desktop/ubon.xlsx"
+SUBDISTRICT_SHAPEFILE_LOCATION = "C:/Users/MM-PC0L6BTX/Desktop/Misc Thai Foci/Thai Boundary/Subdistrict_region.shp"
+FINAL_FILE_LOCATION = "C:/Users/MM-PC0L6BTX/Desktop/validation_output.xlsx"
 
 # Load OSM shape file
 osm_shape = gpd.read_file(OSM_QUERY_LOCATION)
@@ -47,7 +47,7 @@ for i, r in master_list.iterrows():
         # If the point falls in a polygon, add the VILLAGE_ID, osm_id, and _name
         # to the contained_matches list
         if row['geometry'].contains(p):
-            contained_matches.append([r['VILLAGE_ID'], row['osm_id'], row['name']])
+            contained_matches.append([r['VILLAGE_ID'], row['id'], row['name']])
 
 # Convert contained_matches to a DataFrame and set the column names
 contained_matches_df = pd.DataFrame(contained_matches)
@@ -62,7 +62,7 @@ near_matches = []
 for i, r in contained_merge[contained_merge['contained_name'].isnull()].iterrows():
 
     # Convert the GPS coord to a Shapely Point
-    p = Point(r['long'],r['lat'])
+    p = Point(r['long'], r['lat'])
 
     # Get the closest polygon
     min_poly = min(list(osm_shape['geometry']), key=p.distance)
@@ -71,7 +71,7 @@ for i, r in contained_merge[contained_merge['contained_name'].isnull()].iterrows
     matching_poly_row = osm_shape[osm_shape['geometry'] == min_poly]
 
     # Add the VILLAGE_ID, osm_id, and _name to the near_matches list
-    near_matches.append([r['VILLAGE_ID'], matching_poly_row['osm_id'].values[0], matching_poly_row['name'].values[0]])
+    near_matches.append([r['VILLAGE_ID'], matching_poly_row['id'].values[0], matching_poly_row['name'].values[0]])
 
 # Convert the near_matches list to a dataframe, rename the columns, and merge
 # it with the contained_merge DataFrame from earlier
@@ -98,7 +98,7 @@ for i, r in foci_subdist.iterrows():
             # Check whether the osm_shape name contains the foci_subdist name
             # and add to matches list, if so
             if row['name'] is not None and r['VILLAGE_NAME_TH'] in row['name']:
-                matches.append([r['VILLAGE_ID'], row['osm_id'], row['name']])
+                matches.append([r['VILLAGE_ID'], row['id'], row['name']])
 
 # Convert the list to a dataframe, change the column names, and export to Excel
 match_df = pd.DataFrame(matches)
