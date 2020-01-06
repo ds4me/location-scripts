@@ -42,7 +42,7 @@ url_post_reveal_structure_batch = "https://{0}.smartregister.org/opensrp/rest/lo
 
 
 #conn = psycopg2.connect(host="localhost",database="test", user="postgres", password="")
-config.read('./config.ini')
+config.read('./config/config.ini')
 
 def get_request(URL):
 	auth = eval(cnconf['openmrs_auth']) if 'openmrs' in URL  else eval(cnconf['reveal_auth'])
