@@ -9,7 +9,6 @@ ORIGINAL_CRS = "EPSG:4326"
 
 import overpass
 from shapely.geometry import Polygon, Point
-from shapely.strtree import STRtree
 import pandas as pd
 import geopandas as gpd
 import numpy as np
@@ -81,7 +80,7 @@ def linkA1A2FociToMasterlist(a1a2_osm, masterlist):
         a1a2 = cleanDataFrame(a1a2)
 
         # Return the GDF
-        print(f'All {len(a1a2_osm)} foci successfully linked to the masterlist\n')
+        print(f'All {len(a1a2_osm)} foci successfully linked to the masterlist')
         return a1a2
 
 
@@ -129,9 +128,6 @@ def cleanDataFrame(gdf):
 
     # Create a final GeoDataFrame with the correct columns
     return gpd.GeoDataFrame(tmp_gdf.drop(['geometry'], axis=1), geometry= tmp_gdf['geometry'], crs=PROJECTED_CRS)
-
-    # Change the items in the geometry column where necessary and create the 25m buffer
-    # tmp_gdf["geometry"] = tmp_gdf.apply(lambda row: row['geometry'].buffer(25) if row['geometry_changes'] == None else row['geometry_changes'].buffer(25), axis=1)
 
 
 def getOverlaps(df1, df2):
@@ -272,7 +268,7 @@ def getChanges(overlaps, boundaries, ab):
 
     # Print the results and return a GeoDataFrame of them
     print(f'Changed the coordinates of {len(df)} foci')
-    return gpd.GeoDataFrame(df['externalId'], geometry=gpd.points_from_xy(df.long, df.lat))
+    return gpd.GeoDataFrame(df['externalId'], geometry=gpd.points_from_xy(df.long, df.lat), crs=PROJECTED_CRS)
 
 
 # TODO: See if using rtree can speed up the filtering out of ab foci
