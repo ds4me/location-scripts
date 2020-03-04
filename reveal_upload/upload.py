@@ -233,8 +233,6 @@ def load_jurisdictions(id_parent_external, id_parent_opensrp = '', id_parent_ope
 		location['operation'] = l[9]
 		location['processed'] = l[10]
 		location['d_name'] = l[11]
-		
-	
 
 		if location['operation'] != None and location['processed'] != True:
 			locations_progress += 1
@@ -256,8 +254,8 @@ def load_jurisdictions(id_parent_external, id_parent_opensrp = '', id_parent_ope
 		#update db with openMRS id
 		elif location['operation']=='u' and location['processed'] != True:
 				#for now assume we don't need to update openmrs and that it exists in the database
+			openMRS_id = location['id_openmrs']
 			if location['d_name'] == True:
-				openMRS_id = location['id_openmrs']
 				URL = url_get_openmrs_locations.format(url_sd,openMRS_id)
 				c = get_request(URL)
 				mrs = json.loads(c.text)
@@ -331,7 +329,7 @@ def load_files():
 		cur.execute(sql)
 		conn.commit()
 
-	abspath = os.path.abspath('{0}/jurisdiction.csv'.format(location_path))
+	abspath = os.path.abspath('{0}/jurisdictions.csv'.format(location_path))
 	sql = ("COPY jurisdiction_master (id,externalid,parentid,status,name,geographiclevel,openmrs_id,type,coordinates) FROM '{0}' DELIMITER '|' CSV HEADER;".format(abspath))
 	logging.debug(sql)
 	cur.execute(sql)
@@ -347,7 +345,6 @@ def load_files():
 	#sql = ("COPY structure_master FROM '{0}/structure.csv' DELIMITER '|' CSV HEADER;".format(location_path))
 	#cur.execute(sql)
 	#conn.commit()
-
 
 def total_structures(geographic_level):
 	sql = 'SELECT count(*)  from '+ ou_table  + ' where process = true and geographicLevel = ' + str(geographic_level) 
@@ -418,7 +415,7 @@ def load_structures():
 	return
 
 def main(argv):	
-	
+	logging.info("start")
 	global conn 
 	conn = psycopg2.connect(host=config['db']['host'],database=config['db']['database'], user=config['db']['user'], password=config['db']['password'])
 	function = 'none'
@@ -457,16 +454,17 @@ def main(argv):
 			test_run = True
 		elif opt in ("-c" "--country"):
 			country = arg
-
+	logging.info("function: {0}".format(function))
 	if function == 'load_jurisdictions':
+		logging.info("start")
 		cnconf = config[country]
 		jurisdiction_depth = cnconf['jurisdiction_depth']
 		url_sd = cnconf['url_sd']
-		logging.debug("create_hierarchy")
+		logging.info("create_hierarchy")
 		if country == '':	
 			print "Please specify a country and environment e.g. th-st"
 		elif external_parent_id   == '':
-			print "Please specify the externalid of the root location *e.g. the country external id"
+			print "Please specify the externalid of the root location *e.g. the country external id (for thailand this is '0')"
 		else:
 			locations_total = total_locations(external_parent_id)
 			logging.info('Total locations to add: {0}'.format(locations_total))
