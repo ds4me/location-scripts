@@ -1,7 +1,19 @@
 use db_mhealth 
 
-drop table if exists raw_blood_screening
+select * from raw.event e inner join
+raw.event_obs eo
+on e.eventId = eo.eventId
+where e.eventType = 'bednet_distribution'
+order by e.eventId
 
+select eventType, count(*) from raw.event group by eventType 
+
+
+create procedure populate_bednet_distribution
+as
+truncate table blood_screening
+
+insert into bednet_distribution ([eventId], [eventType], [providerId], [entityType], [baseEntityId], [teamId], [team], [locationId], [focusAreaId], [childLocationId], [dateCreated], [taskstatus], [locationUUID], [appVersionName], [taskIdentifier], [taskBusinessStatus], [planId], [caseTestingProtocol], [forestGoerYesNo], [personTested], [testType], [slideNumber], [testMicrosResult], [business_status], [conceptstart], [conceptend], [conceptdeviceId])
 select 
 			e.eventId as eventId, 
 			e.eventType as eventType, 
@@ -19,7 +31,7 @@ select
 			ed.[appVersionName],
 			ed.[taskIdentifier],
 			ed.[taskBusinessStatus],
-			null as planId,
+			null as planId/*,
 			caseTestingProtocol.val as caseTestingProtocol ,
 			forestGoerYesNo.val as forestGoerYesNo,
 			personTested.val as personTested,
@@ -29,22 +41,46 @@ select
 			business_status.val as business_status,
 			conceptstart.val as conceptstart,
 			conceptend.val as conceptend,
-			conceptdeviceId.val as conceptdeviceId
-			into raw_blood_screening
+			conceptdeviceId.val as conceptdeviceId*/
 from		raw.event  e
 left join	raw.event_detail ed on e.eventId = ed.eventId
-left join	raw.event_obs caseTestingProtocol on e.eventId =  caseTestingProtocol.eventId and caseTestingProtocol.fieldCode = caseTestingProtocol
-left join	raw.event_obs forestGoerYesNo on e.eventId =  forestGoerYesNo.eventId and forestGoerYesNo.fieldCode = forestGoerYesNo
-left join	raw.event_obs personTested on e.eventId =  personTested.eventId and personTested.fieldCode = personTested
-left join	raw.event_obs testType on e.eventId =  testType.eventId and testType.fieldCode = testType
-left join	raw.event_obs slideNumber on e.eventId =  slideNumber.eventId and slideNumber.fieldCode = slideNumber
-left join	raw.event_obs testMicrosResult on e.eventId =  testMicrosResult.eventId and testMicrosResult.fieldCode = testMicrosResult
-left join	raw.event_obs business_status on e.eventId =  business_status.eventId and business_status.fieldCode = business_status
-left join	raw.event_obs conceptstart on e.eventId =  conceptstart.eventId and conceptstart.fieldCode = 163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-left join	raw.event_obs conceptend on e.eventId =  conceptend.eventId and conceptend.fieldCode = 163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-left join	raw.event_obs conceptdeviceId on e.eventId =  conceptdeviceId.eventId and conceptdeviceId.fieldCode = 163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+left join	raw.event_obs totPopulation on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs existingLLINs on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs existingLLINsLessThan1yr on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs existingLLINs1yrTo2yr on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs existingLLINs2yrTo3yr on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs existingLLINsGreaterThan3yr on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs existingLLIHNs on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs existingITNs on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs existingITNDipped on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs calcExistingNets on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs calcNumNetsNeeded on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs calcNumNetsToDistribute on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs distributedLLINs  on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs distributedLLIHNs on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs distributedITNs on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs calcPopulationMinusExistingNets on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs calcTotalNetsDistributed on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs calcDistributedRecommendation on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs calcNumNetsToRedip on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs redippedITNs on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs distributedRepellent on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+left join	raw.event_obs business_status on e.eventId = totPopulation.eventId and  totPopulation.fieldCode = 'totPopulation'
+
+
+
+
+left join	raw.event_obs conceptstart on e.eventId =  conceptstart.eventId and conceptstart.fieldCode = '163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+left join	raw.event_obs conceptend on e.eventId =  conceptend.eventId and conceptend.fieldCode = '163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+left join	raw.event_obs conceptdeviceId on e.eventId =  conceptdeviceId.eventId and conceptdeviceId.fieldCode = '163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 left join	focus_masterlist ml on upper(ml.opensrp_id) = e.locationId
-where e.eventType = blood_screening
+where e.eventType = 'bednet_distribution'
+
+GO
+
+create table test (j json)
+
+print @@version
 
 select bs.eventid, bs.eventtype,lower(bs.taskIdentifier),lower(bs.locationId), t.identifier
 from raw_blood_screening bs

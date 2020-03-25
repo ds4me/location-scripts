@@ -1,0 +1,45 @@
+{
+                        "code": {
+                            "coding": [
+                                {
+                                    "system": "https://trakcarelabwebview.nhls.ac.za/observation/common-concept",
+                                    "code": "Microscopy Result",
+                                    "display": "Microscopy Result"
+                                },
+                                {
+                                    "system": "https://trakcarelabwebview.nhls.ac.za/observation/test-code",
+                                    "code": "M176",
+                                    "display": "Auramine (with TB culture)"
+                                },
+                                {
+                                    "system": "https://trakcarelabwebview.nhls.ac.za/observation/param-code",
+                                    "code": "M0024",
+                                    "display": "AFB (rapid unconcentrated)"
+                                }
+                            ]
+                        },
+                        "valueQuantity": {
+                            "value": "0",
+                            "unit": ""
+                        },
+                        "interpretation": [
+                            {
+                                "coding": [
+                                    {
+                                        "system": "https://trakcarelabwebview.nhls.ac.za/observation/ObservationInterpretation",
+                                        "code": "0",
+                                        "display": "NO acid fast bacilli observed"
+                                    },
+                                    {
+                                        "system": "https://trakcarelabwebview.nhls.ac.za/observation/common-results",
+                                        "code": "Negative",
+                                        "display": "Negative"
+                                    }
+                                ],
+                                "text": ""
+                            }
+                        ],
+                        "referenceRange": [
+                            {}
+                        ]
+                    }

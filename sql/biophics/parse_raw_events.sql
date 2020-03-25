@@ -122,6 +122,8 @@ type  varchar(255),
 id  varchar(255)
 )
 
+select * from raw.event
+
 insert into raw_data_working
 select	 
 		JSON_VALUE(event_json,'$.baseEntityId') baseEntityId,
@@ -179,7 +181,9 @@ fieldCode  varchar(50),
 val  varchar(500)
 )
 
-insert into raw_data_values_working
+truncate table raw.event_obs
+
+insert into raw.event_obs ( [eventId], [fieldType], [fieldDataType], [fieldCode], [val])
 select raw_data.id, obs.* 
 from raw_data 
 cross apply openjson(JSON_query(event_json,'$.obs')) WITH (

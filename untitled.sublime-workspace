@@ -1,0 +1,369 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"url_po",
+				"url_post_reveal_jurisdiction"
+			],
+			[
+				"id_o",
+				"id_openmrs"
+			],
+			[
+				"juris",
+				"jurisdiction_depth"
+			],
+			[
+				"jur",
+				"jurisdiction_depth"
+			],
+			[
+				"Error",
+				"error"
+			],
+			[
+				"locations",
+				"locations_progress"
+			],
+			[
+				"openmrs",
+				"openmrspost"
+			],
+			[
+				"openm",
+				"openmrs_location"
+			],
+			[
+				"get_openmrs",
+				"url_get_openmrs_locations"
+			],
+			[
+				"p",
+				"print"
+			],
+			[
+				"d",
+				"dumps"
+			],
+			[
+				"body",
+				"bodystring"
+			],
+			[
+				"id",
+				"id_external"
+			],
+			[
+				"s",
+				"set"
+			],
+			[
+				"orgu",
+				"organisation_unit"
+			],
+			[
+				"i",
+				"id_openSRP"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "reveal_upload/config/config.ini",
+			"settings":
+			{
+				"buffer_size": 2823,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/config"
+	],
+	"file_history":
+	[
+		"/Users/pierredane/Dropbox/Documents/NHLS/Test files/XD00849097-CD4.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/matchnames.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/sql/create_scripts.sql",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/config/config.ini",
+		"/Users/pierredane/Dropbox/Documents/NHLS/sql/parseJson.sql",
+		"/Users/pierredane/Dropbox/Documents/DSME/nhls.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/upload.py",
+		"/Users/pierredane/Downloads/pilot_changes.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/README.md",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/sql/run_merge.sql",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/getevents.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/.gitignore",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/toimport/locations/readme.txt",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/toimport/geojson/readme.txt",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/json.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/sql/insert_changeset.sql",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/toimport/geojson/Tak_5_additions_updates_2019112823.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/toimport/geojson/thai_2_addition_2019120512.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/toimport/geojson/thai_missing_3_mock_locations_2019120416.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/Tak_6_2019101611.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/stage-plans.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/Ubon_6_2019101613.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/dsme_location_management_structures.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/plans.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/imported/west_2_2019102316.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/imported/Trat_5_2019101520.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/ubon_4_additional_2019112115.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/config/testconfig.ini",
+		"/Users/pierredane/Downloads/openmrs.csv",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/sql/merge_stats.sql",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/checkassignmentexists.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/config/config.ini",
+		"/Users/pierredane/Dropbox/Documents/DSME/location-scripts/reveal_upload/dsme_location_management_sync_names.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/dsme_location_management_sync_names.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/dsme_location_management_new.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/xxx_dsme_location_management.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/test_4_2019110710.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/test_3_2019110710.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/test_2_2019110710.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/test_5_2019110711.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/Trat_4_20191028111.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/Adm2_09102019.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson_imported/Adm2.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson_imported/Adm3.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/ubon/Adm5_thai_names.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/dsme_location_management_namibia.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/geojson.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/vl_reveal_all_structures.geojson",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/zam_reveal_sas.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/populate_org_unit_raw2.sql",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/populate_org_unit_reveal2.sql",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/view_hierarchies2.sql",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/create_tables.sql",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/orgunittable.sql",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson_imported/regions_ADM1 copy.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/zam_reveal_provinces.geojson",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/vlgs_allOshakati_12_09_19.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/app.log",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/all_macepa_reveal_structures.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/dsme_location_management.py",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/app.log",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/villages_ADM3.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/demo.sql",
+		"/Users/pierredane/Dropbox/Documents/DSME/Namibia/Reveal GeoJSON/regions_ADM1.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/HRHETL",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/data.txt",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/guru99.txt",
+		"/Users/pierredane/Dropbox/Documents/DSME/git",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/regions_ADM1.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/namibia_ADM0.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/Namibia_Villages_Sept_10.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/districts_ADM2.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/test.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/plans.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/CDD/dsme_cdd.json",
+		"/Users/pierredane/Dropbox/Documents/DSME/CDD/dsme.json",
+		"/Users/pierredane/Dropbox/Documents/Thailand/python/helloworld.py",
+		"/Users/pierredane/Trat_Geojson/Trat_Village.geojson",
+		"/Users/pierredane/Dropbox/VitalWaveMalaria/Trat_files_json/Trat_Village.geojson",
+		"/Users/pierredane/Trat_files_json/Tart_Dist.json",
+		"/Users/pierredane/Trat_files_json/Trat_Prov.json",
+		"/Users/pierredane/Dropbox/VitalWaveMalaria/helloworld.py",
+		"/Users/pierredane/Dropbox/VitalWaveMalaria/trat/parse.sql",
+		"/Users/pierredane/Dropbox/VitalWaveMalaria/trat/createtables.sql",
+		"/Users/pierredane/Dropbox/VitalWaveMalaria/trat/provinces.sql",
+		"/Users/pierredane/Dropbox/VitalWaveMalaria/trat/districts.sql",
+		"/Users/pierredane/Dropbox/VitalWaveMalaria/trat/subdistricts.sql",
+		"/Users/pierredane/Dropbox/VitalWaveMalaria/trat/villages.sql",
+		"/Users/pierredane/Dropbox/VitalWaveMalaria/trat/foci.sql",
+		"/Users/pierredane/Dropbox/VitalWaveMalaria/tak/TakSql/foci.sql",
+		"/Users/pierredane/Dropbox/VitalWaveMalaria/trat/structures.sql",
+		"/Users/pierredane/Downloads/Trat_Geojson/Trat_Foci.geojson",
+		"/Users/pierredane/Downloads/province_LopBuri.json",
+		"/Users/pierredane/Downloads/citation-287764503.txt",
+		"/Users/pierredane/Downloads/dhis/docker-compose.yml",
+		"/Users/pierredane/Dropbox/Development/MedScraper/scraper.py"
+	],
+	"find":
+	{
+		"height": 24.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "reveal_upload/config/config.ini",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2823,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1,
+								1
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 24.0
+	},
+	"input":
+	{
+		"height": 36.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "untitled.sublime-project",
+	"replace":
+	{
+		"height": 44.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 377.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
