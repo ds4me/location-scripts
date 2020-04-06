@@ -16,6 +16,8 @@ sys.setdefaultencoding('utf-8')
 
 logging.basicConfig(filename='./logs/app.log', filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.getLogger().addHandler(logging.StreamHandler())
+
 config = configparser.ConfigParser()
 
 
