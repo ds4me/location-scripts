@@ -34,6 +34,7 @@ conn = ''
 firstrun = True
 url_sd = ''
 country = ''
+skip_csv = 0
 
 revealtemplate = {
     "type": "Feature", "id": "$id_opensrp", "serverVersion": 0,
@@ -321,18 +322,19 @@ def load_files():
     sql_path = '../sql'
     files = []
     data = ''
+    global skip_csv
     # r=root, d=directories, f = files
     logging.info('Importing files:')
     cur = conn.cursor()
-    logging.info('  Truncating database tables')
+    logging.info('   Truncating database tables')
     sql = ("truncate table geojson_file; truncate table changeset; truncate table mergeset; truncate table jurisdiction_master; truncate table structure_master;")
     cur.execute(sql)
     conn.commit()
-    logging.info('Loading geoJSON files @ {0}'.format(geo_path))
+    logging.info('   Loading geoJSON files @ {0}'.format(geo_path))
     for r, d, f in os.walk(geo_path):
         for file in f:
             if not file.startswith('.'):
-                logging.info('Loading geoJSON file: {0}'.format(file))
+                logging.info('   Loading geoJSON file: {0}'.format(file))
                 with open('{0}/{1}'.format(geo_path, file)) as json_file:
                     try:
                         data = json.load(json_file)
@@ -344,7 +346,7 @@ def load_files():
                         cur.execute(sql)
                         conn.commit()
 
-    logging.info('Running SQL: {0}'.format('insert_changeset.sql'))
+    logging.info('   Running SQL: {0}'.format('insert_changeset.sql'))
     with open('{0}/{1}'.format(sql_path, 'insert_changeset.sql')) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
@@ -352,17 +354,41 @@ def load_files():
         conn.commit()
 
     abspath = os.path.abspath('{0}/jurisdictions.csv'.format(location_path))
-    logging.info('Importing master CSV files from: {0}'.format(abspath))
-    copy_sql = "COPY jurisdiction_master (id,externalid,parentid,status,name,geographiclevel,openmrs_id,type,coordinates) FROM STDIN DELIMITER '|' CSV HEADER;"
-    cur.copy_expert(sql=copy_sql, file=open(abspath,"r"))
-    conn.commit()
+    logging.info('   Importing master CSV file from: {0}'.format(abspath))
+    if skip_csv == 0:
+        copy_sql = "COPY jurisdiction_master (id,externalid,parentid,status,name,geographiclevel,openmrs_id,type,coordinates) FROM STDIN DELIMITER '|' CSV HEADER;"
+        cur.copy_expert(sql=copy_sql, file=open(abspath,"r"))
+        conn.commit()
+    else:
+        logging.info('  Skipping csv upload')
 
-    logging.info('Running SQL: {0}'.format('run_merge.sql'))
+
+    logging.info('   Running SQL: {0}'.format('run_merge.sql'))
     with open('{0}/{1}'.format(sql_path, 'run_merge.sql')) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
         cur.execute(sql)
         conn.commit()
+
+    id_sql = ''
+    if cnconf['different_external_ids'] == 1:
+        id_sql = 'generate_opensrp_ids.sql'
+    else:
+         id_sql = 'set_opensrp_ids_from_external.sql'
+    logging.info('   Running SQL: {0}'.format(id_sql))
+    with open('{0}/{1}'.format(sql_path, id_sql)) as sql_file:
+        sql = sql_file.read()
+        logging.debug(sql)
+        cur.execute(sql)
+        conn.commit()
+
+    if cnconf['add_name_suffix'] == 1:
+        logging.info('   Running SQL: {0}'.format('add_suffix.sql'))
+        with open('{0}/{1}'.format(sql_path, 'add_suffix.sql')) as sql_file:
+            sql = sql_file.read()
+            logging.debug(sql)
+            cur.execute(sql)
+            conn.commit()
 
     logging.info('Completed load_files successfully')
 
@@ -457,10 +483,11 @@ def main(argv):
     global locations_total
     global url_sd
     global country
+    global skip_csv
 
     try:
-        opts, args = getopt.getopt(argv, "hf:s:o:t:l:Tjpe:d:m:c:", [
-                                   "funct=", "opensrp_root=", "oname=", "table=", "level=", "testrun", "jurisdiction_only", "put", "external_parent_id=", "depth=", "openmrs_root=", "country="])
+        opts, args = getopt.getopt(argv, "hf:so:t:l:Tjpe:d:m:c:", [
+                                   "funct=", "skip_csv", "oname=", "table=", "level=", "testrun", "jurisdiction_only", "put", "external_parent_id=", "depth=", "openmrs_root=", "country="])
     except getopt.GetoptError as e:
         print 'Use e -h for help'
         print e
@@ -479,6 +506,8 @@ def main(argv):
             test_run = True
         elif opt in ("-c" "--country"):
             country = arg
+        elif opt in ("-s" "--skip_csv"):
+            skip_csv = 1
     logging.info("function: {0}".format(function))
     #all of these functions require a country code to get configuration
     if country == '':

@@ -34,12 +34,7 @@ where 		ml.externalid = mergeset.externalid
 and 		ml.externalparentid <>  mergeset.externalparentid
 and 		mergeset.operation is not null;
 
--- add externalId suffix
-update 		mergeset set name_en = concat(name_en , ' (',externalId,')')
-where 		operation is not null;
 
-update 		mergeset set name = concat(name , ' (',externalId,')')
-where 		operation is not null;
 
 --flag delta on name
 update 		mergeset set d_name = true
@@ -86,7 +81,7 @@ and mergeset.operation = 'u';
 --assign uuid for new jurisdictions
 update mergeset
 set opensrp_id = uuid_generate_v4()
-where operation = 'i';
+where operation = 'i' and opensrp_id is null;
 
 --update mergeset opensrpparent_id from self
 update mergeset

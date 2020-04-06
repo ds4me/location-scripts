@@ -66,3 +66,11 @@ CREATE TABLE structure_master
     type character varying ,
     coordinates character varying
 );
+
+
+DROP TABLE if exists geojson_file;
+CREATE TABLE geojson_file
+(
+    file_name character varying,
+    file json
+)
