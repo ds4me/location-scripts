@@ -343,8 +343,8 @@ def load_files():
                         sql = ("insert into geojson_file (file, file_name) values ('{0}', '{1}');").format(geo, file)
                         cur.execute(sql)
                         conn.commit()
-    # now import csv
 
+    logging.info('Running SQL: {0}'.format('insert_changeset.sql'))
     with open('{0}/{1}'.format(sql_path, 'insert_changeset.sql')) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
@@ -352,19 +352,20 @@ def load_files():
         conn.commit()
 
     abspath = os.path.abspath('{0}/jurisdictions.csv'.format(location_path))
+    logging.info('Importing master CSV files from: {0}'.format(abspath))
     copy_sql = "COPY jurisdiction_master (id,externalid,parentid,status,name,geographiclevel,openmrs_id,type,coordinates) FROM STDIN DELIMITER '|' CSV HEADER;"
     cur.copy_expert(sql=copy_sql, file=open(abspath,"r"))
     conn.commit()
 
+    logging.info('Running SQL: {0}'.format('run_merge.sql'))
     with open('{0}/{1}'.format(sql_path, 'run_merge.sql')) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
         cur.execute(sql)
         conn.commit()
 
-    #sql = ("COPY structure_master FROM '{0}/structure.csv' DELIMITER '|' CSV HEADER;".format(location_path))
-    # cur.execute(sql)
-    # conn.commit()
+    logging.info('Completed load_files successfully')
+
 
 def total_structures(geographic_level):
     sql = 'SELECT count(*)  from ' + ou_table + \
