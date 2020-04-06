@@ -324,15 +324,15 @@ def load_files():
     # r=root, d=directories, f = files
     logging.info('Importing files:')
     cur = conn.cursor()
-    logging.info('  Truncating database tables')
+    logging.info('   Truncating database tables')
     sql = ("truncate table geojson_file; truncate table changeset; truncate table mergeset; truncate table jurisdiction_master; truncate table structure_master;")
     cur.execute(sql)
     conn.commit()
-    logging.info('Loading geoJSON files @ {0}'.format(geo_path))
+    logging.info('   Loading geoJSON files @ {0}'.format(geo_path))
     for r, d, f in os.walk(geo_path):
         for file in f:
             if not file.startswith('.'):
-                logging.info('Loading geoJSON file: {0}'.format(file))
+                logging.info('   Loading geoJSON file: {0}'.format(file))
                 with open('{0}/{1}'.format(geo_path, file)) as json_file:
                     try:
                         data = json.load(json_file)
@@ -344,7 +344,7 @@ def load_files():
                         cur.execute(sql)
                         conn.commit()
 
-    logging.info('Running SQL: {0}'.format('insert_changeset.sql'))
+    logging.info('   Running SQL: {0}'.format('insert_changeset.sql'))
     with open('{0}/{1}'.format(sql_path, 'insert_changeset.sql')) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
@@ -352,12 +352,12 @@ def load_files():
         conn.commit()
 
     abspath = os.path.abspath('{0}/jurisdictions.csv'.format(location_path))
-    logging.info('Importing master CSV files from: {0}'.format(abspath))
+    logging.info('   Importing master CSV file from: {0}'.format(abspath))
     copy_sql = "COPY jurisdiction_master (id,externalid,parentid,status,name,geographiclevel,openmrs_id,type,coordinates) FROM STDIN DELIMITER '|' CSV HEADER;"
     cur.copy_expert(sql=copy_sql, file=open(abspath,"r"))
     conn.commit()
 
-    logging.info('Running SQL: {0}'.format('run_merge.sql'))
+    logging.info('   Running SQL: {0}'.format('run_merge.sql'))
     with open('{0}/{1}'.format(sql_path, 'run_merge.sql')) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
