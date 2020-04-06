@@ -31,35 +31,31 @@ cnconf = ''
 conn = ''
 firstrun = True
 url_sd = ''
+country = ''
 
 revealtemplate = {
     "type": "Feature", "id": "$id_opensrp", "serverVersion": 0,
     "geometry": {"type": "$type", "coordinates": 1111111111},
-    "properties": {"status": "Active", "parentId": "$id_parent_opensrp", "name": "$name", "name_en": "$nam_en", "geographicLevel": 2222222222, "version": 0, "externalId": "$id_external", "OpenMRS_Id": "$id_openmrs"}
-}
+    "properties": {"status": "Active", "parentId": "$id_parent_opensrp", "name": "$name", "name_en": "$nam_en", "geographicLevel": 2222222222, "version": 0, "externalId": "$id_external", "OpenMRS_Id": "$id_openmrs"}}
 
 revealtemplate_structure = {
     "type": "Feature", "id": "$id_opensrp", "serverVersion": 0,
     "geometry": {"type": "$type", "coordinates": 1111111111},
-    "properties": {"status": "Active", "parentId": "$id_parent_opensrp", "geographicLevel": 2222222222, "version": 0, "externalId": "$id_external"}
-}
-
+    "properties": {"status": "Active", "parentId": "$id_parent_opensrp", "geographicLevel": 2222222222, "version": 0, "externalId": "$id_external"}}
 
 revealtemplate_parent = {
     "type": "Feature", "id": "$id_opensrp",  "serverVersion": 0,
     "geometry": {"type": "$type", "coordinates": 1111111111},
-    "properties": {"status": "Active", "name": "$name", "geographicLevel": 2222222222, "version": 0, "externalId": "$id_external"},
-}
+    "properties": {"status": "Active", "name": "$name", "geographicLevel": 2222222222, "version": 0, "externalId": "$id_external"}}
 
 reveal_template = {"type": "Feature", "serverVersion": 0, "geometry": {
     "type": "$type"}, "properties": {"status": "Active", "version": 0}}
+
 openmrstemplate = {"name": "$name", "tags": [{"uuid": "$hierarchytag"}], "parentLocation": {
     "uuid": "$parentuuid"}, "childLocations": [], "resourceVersion": "2.0"}
 
 url_get_reveal_jurisdiction = "https://{0}.smartregister.org/opensrp/rest/location/{1}?is_jurisdiction=true"
-# .format(url_sd, "%")
 url_get_reveal_jurisdictions = "https://{0}.smartregister.org/opensrp/rest/location/findByProperties?is_jurisdiction=true&return_geometry=true&properties_filter=parentId:{1}"
-# .format(url_sd, "%")
 url_get_reveal_structure = "https://{0}.smartregister.org/opensrp/rest/location/findByProperties?is_jurisdiction=false&return_geometry=true&properties_filter=parentId:{1}"
 url_get_openmrs_locations = "https://openmrs.{0}.smartregister.org/openmrs/ws/rest/v1/location/{1}"
 url_post_reveal_jurisdiction = "https://{0}.smartregister.org/opensrp/rest/location/?is_jurisdiction=true"
@@ -70,16 +66,13 @@ url_get_openmrs_locations_name = "https://openmrs.{0}.smartregister.org/openmrs/
 url_get_openmrs_attrbutes = "http://openmrs.{0}.smartregister.org/openmrs/ws/rest/v1/location/{1}/attribute/{2}"
 url_post_reveal_structure_batch = "https://{0}.smartregister.org/opensrp/rest/location/add?is_jurisdiction=false"
 
-#conn = psycopg2.connect(host="localhost",database="test", user="postgres", password="")
 config.read('./config/config.ini')
-
 
 def get_request(URL):
     auth = eval(cnconf['openmrs_auth']) if 'openmrs' in URL else eval(
         cnconf['reveal_auth'])
     response = requests.get(URL, auth=auth)
     return response
-
 
 def post_request(URL, body, operation):
     # logging.info(locals())
@@ -94,7 +87,6 @@ def post_request(URL, body, operation):
                                 "Content-Type": "application/json"})
     return response
 
-
 def post_reveal_location(id_opensrp, coordinates, id_parent_opensrp, location_name, location_name_en, geographicLevel, id_external, geometry_type, id_openmrs, operation):
     logging.debug(locals())
     revealpost = json.dumps(revealtemplate)
@@ -105,8 +97,7 @@ def post_reveal_location(id_opensrp, coordinates, id_parent_opensrp, location_na
     revealpost = revealpost.replace('$id_openmrs', str(id_openmrs))
     revealpost = revealpost.replace('$id_opensrp', str(id_opensrp))
     revealpost = revealpost.replace('1111111111', str(coordinates))
-    revealpost = revealpost.replace(
-        '$id_parent_opensrp', str(id_parent_opensrp))
+    revealpost = revealpost.replace('$id_parent_opensrp', str(id_parent_opensrp))
     revealpost = revealpost.replace('2222222222', str(geographicLevel))
     revealpost = revealpost.replace('$id_external', id_external)
     revealpost = revealpost.replace('$type', str(geometry_type))
@@ -124,7 +115,6 @@ def post_reveal_location(id_opensrp, coordinates, id_parent_opensrp, location_na
     # should stop iterating if there is an error
     return
 
-
 def write_openmrs_id_to_database(openmrs_uuid, opensrp_uuid):
     if test_run == False:
         cur = conn.cursor()
@@ -133,7 +123,6 @@ def write_openmrs_id_to_database(openmrs_uuid, opensrp_uuid):
         logging.debug(sql)
         cur.execute(sql)
         conn.commit()
-
 
 def update_database(opensrp_uuid):
     if test_run == False:
@@ -144,7 +133,6 @@ def update_database(opensrp_uuid):
         logging.debug(sql)
         cur.execute(sql)
         conn.commit()
-
 
 def check_existing_openmrs_location(openmrs_name):
     # get locations by name
@@ -164,7 +152,6 @@ def check_existing_openmrs_location(openmrs_name):
         else:
             logging.debug('Did not find uuid')
     return uuid
-
 
 def post_openmrs_location(parent_id_openmrs, location_name, geographicLevel, operation):
     openmrs_hierarchy_tag = cnconf[str(geographicLevel)]
@@ -203,7 +190,6 @@ def post_openmrs_location(parent_id_openmrs, location_name, geographicLevel, ope
         id_openmrs = 'test_uuid'
     return id_openmrs
 
-
 def total_locations(id_parent_external):
     #sql = 'SELECT count(*)  from '+ ou_table  + ' where issue = false and externalParentId =' + "'" + id_parent_external + "'"
     sql = 'SELECT count(*)  from mergeset where operation is not null and processed is null'
@@ -213,10 +199,9 @@ def total_locations(id_parent_external):
     cur.close()
     return counts[0][0]
 
-
 def load_jurisdictions(id_parent_external, id_parent_opensrp='', id_parent_openmrs=''):
 
-    # ROOT NODES NEED TO BE CREATED FIRSLT AND UUIDS SUPPLIED
+    # ROOT NODES NEED TO BE CREATED FIRST AND UUIDS SUPPLIED IN CONFIG FILE
     global locations_total
     global locations_progress
     global jurisdiction_only
@@ -328,7 +313,6 @@ def load_jurisdictions(id_parent_external, id_parent_opensrp='', id_parent_openm
                 location['id_external'], location['id_opensrp'], openMRS_id)
         # add to openSRP
 
-
 def load_files():
     geo_path = './toimport/geojson'
     location_path = './toimport/locations'
@@ -336,16 +320,17 @@ def load_files():
     files = []
     data = ''
     # r=root, d=directories, f = files
-    logging.info('Importing files')
+    logging.info('Importing files:')
     cur = conn.cursor()
+    logging.info('  Truncating database tables')
     sql = ("truncate table geojson_file; truncate table changeset; truncate table mergeset; truncate table jurisdiction_master; truncate table structure_master;")
     cur.execute(sql)
     conn.commit()
-    logging.info(geo_path)
+    logging.info('Loading geoJSON files @ {0}'.format(geo_path))
     for r, d, f in os.walk(geo_path):
         for file in f:
             if not file.startswith('.'):
-                logging.info(file)
+                logging.info('Loading geoJSON file: {0}'.format(file))
                 with open('{0}/{1}'.format(geo_path, file)) as json_file:
                     try:
                         data = json.load(json_file)
@@ -353,13 +338,7 @@ def load_files():
                         logging.info("value error")
                     if data != '':
                         geo = json.dumps(data).replace("'", "")
-                        #cur = conn.cursor()
-                        #sql = ("insert into rawfiles (file, file_name) values ('{0}', '{1}');").format(geo, file)
-                        # cur.execute(sql)
-                        conn.commit()
-                        sql = ("insert into geojson_file (file, file_name) values ('{0}', '{1}');").format(
-                            geo, file)
-                        # logging.info(sql)
+                        sql = ("insert into geojson_file (file, file_name) values ('{0}', '{1}');").format(geo, file)
                         cur.execute(sql)
                         conn.commit()
     # now import csv
@@ -385,7 +364,6 @@ def load_files():
     # cur.execute(sql)
     # conn.commit()
 
-
 def total_structures(geographic_level):
     sql = 'SELECT count(*)  from ' + ou_table + \
         ' where process = true and geographicLevel = ' + str(geographic_level)
@@ -394,7 +372,6 @@ def total_structures(geographic_level):
     counts = cur.fetchall()
     cur.close()
     return counts[0][0]
-
 
 def create_reveal_structure_geojson(id_opensrp, coordinates, id_parent_opensrp, location_name, geographicLevel, id_external, geometry_type):
     logging.debug(locals())
@@ -409,7 +386,6 @@ def create_reveal_structure_geojson(id_opensrp, coordinates, id_parent_opensrp, 
     revealpost = revealpost.replace('$type', geometry_type)
     logging.debug(revealpost)
     return json.loads(revealpost)
-
 
 def load_structures():
     global ou_table
@@ -459,12 +435,10 @@ def load_structures():
             structures = []
     return
 
-
 def main(argv):
     logging.info("start")
     global conn
-    conn = psycopg2.connect(host=config['db']['host'], database=config['db']
-                            ['database'], user=config['db']['user'], password=config['db']['password'])
+    
     function = 'none'
     external_parent_id = ''
     geographic_level = 0
@@ -479,7 +453,7 @@ def main(argv):
     global cnconf
     global locations_total
     global url_sd
-    country = ''
+    global country
 
     try:
         opts, args = getopt.getopt(argv, "hf:s:o:t:l:Tjpe:d:m:c:", [
@@ -503,16 +477,23 @@ def main(argv):
         elif opt in ("-c" "--country"):
             country = arg
     logging.info("function: {0}".format(function))
+    #all of these functions require a country code to get configuration
+    if country == '':
+    	print "Please specify a country and environment e.g. th-st"
+    	sys.exit()
+    else:
+    	cnconf = config[country]
+	database = '{0}_{1}'.format(config['db']['database'],country.replace('-','_'))
+	conn = psycopg2.connect(host=config['db']['host'], database=database, user=config['db']['user'], password=config['db']['password'])
+
+	#functions
     if function == 'load_jurisdictions':
         logging.info("start")
-        cnconf = config[country]
         jurisdiction_depth = cnconf['jurisdiction_depth']
         url_sd = cnconf['url_sd']
         logging.info("create_hierarchy")
-        if country == '':
-            print "Please specify a country and environment e.g. th-st"
-        elif external_parent_id == '':
-            print "Please specify the externalid of the root location *e.g. the country external id (for thailand this is '0')"
+        if external_parent_id == '':
+            print "Please specify the externalid of the root location (e.g. the country external id (for thailand this is '0')"
         else:
             locations_total = total_locations(external_parent_id)
             logging.info('Total locations to add: {0}'.format(locations_total))
@@ -520,7 +501,6 @@ def main(argv):
     elif function == 'load_files':
         load_files()
     elif function == 'load_structures':
-        cnconf = config[country]
         jurisdiction_depth = cnconf['jurisdiction_depth']
         if ou_table == '':
             print "Please specify a database table"
