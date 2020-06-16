@@ -5,16 +5,19 @@ import geopandas as gpd
 import requests
 import json
 import overpy
+import configparser
 
-# TODO: Add your credentials!
+config = configparser.ConfigParser()
+config.read('config.ini')
+
 # osm credentials
-REAL_OSM_USER = ""
-REAL_OSM_PASS = ""
+REAL_OSM_USER = config['public_osm']['username']
+REAL_OSM_PASS = config['public_osm']['password']
 
 # bvbdosm credentials
 LOCAL_OSM_URL = 'https://bvbdosm.herokuapp.com'
-LOCAL_OSM_USER = 'bvbd'
-LOCAL_OSM_PASS = 'bvbdosm1'
+LOCAL_OSM_USER = config['local_osm']['username']
+LOCAL_OSM_PASS = config['local_osm']['password']
 
 # Required changeset description
 CHANGESET_DESCRIPTION = 'Add all existing foci'

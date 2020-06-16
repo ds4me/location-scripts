@@ -5,6 +5,7 @@ import geojson
 import argparse
 import os
 from datetime import timezone
+import configparser
 
 def create_feature(way, nodes):
     coords = []
@@ -140,10 +141,14 @@ def main():
     parser.add_argument('output_file', type=path_with_geojson, help="Output file location, must end with '.geojson'")
     args = parser.parse_args()
 
+    # Read the config.ini file to get the username and password
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
     # Get api for local OSM instance
     url = 'https://bvbdosm.herokuapp.com'
-    usr = 'bvbd'
-    pw = 'bvbdosm1'
+    usr = config['local_osm']['username']
+    pw = config['local_osm']['password']
     api = osmapi.OsmApi(api=url, username=usr, password=pw)
 
     # If id chosen, run get_ways_by_ids to get a collection of features
