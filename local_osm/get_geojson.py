@@ -92,33 +92,33 @@ def get_ways_by_ids(api, min_id, max_id, source_filter):
     return feats
 
 
-def get_ways_by_bbox(api, bbox):
-    # Get all nodes/ways/relations in the bbox
-    map = api.Map(bbox['left'], bbox['bottom'], bbox['right'], bbox['top'])
-
-    # Create empty lists for the nodes and ways
-    nodes = []
-    ways = []
-
-    # Loop through the map result to sort out nodes from ways
-    for d in map:
-        if d['type'] == 'node':
-            node = simplify_node(d)
-            nodes.append(node)
-        if d['type'] == 'way':
-            ways.append(d)
-
-    print(f'Extracted {len(ways)} ways and {len(nodes)} associated nodes')
-
-    # Loop through ways to create features
-    feats = []
-    for w in ways:
-        wayNodeIDs = w['data']['nd']
-        wayNodes = [node for node in nodes if node['id'] in wayNodeIDs]
-        feat = create_feature(w, wayNodes)
-        feats.append(feat)
-
-    return feats
+# def get_ways_by_bbox(api, bbox):
+#     # Get all nodes/ways/relations in the bbox
+#     map = api.Map(bbox['left'], bbox['bottom'], bbox['right'], bbox['top'])
+#
+#     # Create empty lists for the nodes and ways
+#     nodes = []
+#     ways = []
+#
+#     # Loop through the map result to sort out nodes from ways
+#     for d in map:
+#         if d['type'] == 'node':
+#             node = simplify_node(d)
+#             nodes.append(node)
+#         if d['type'] == 'way':
+#             ways.append(d)
+#
+#     print(f'Extracted {len(ways)} ways and {len(nodes)} associated nodes')
+#
+#     # Loop through ways to create features
+#     feats = []
+#     for w in ways:
+#         wayNodeIDs = w['data']['nd']
+#         wayNodes = [node for node in nodes if node['id'] in wayNodeIDs]
+#         feat = create_feature(w, wayNodes)
+#         feats.append(feat)
+#
+#     return feats
 
 
 def path_with_geojson(saveLoc):
@@ -158,15 +158,15 @@ def main():
     if args.source_filter: print(f'Filtering output by the following source tag(s): {args.source_filter}')
 
     # If id chosen, run get_ways_by_ids to get a collection of features
-    if args.type == "id":
-        print(f'Getting ways with IDs between {args.min_id} and {args.max_id}')
-        feats = get_ways_by_ids(api, args.min_id, args.max_id, args.source_filter)
+    # if args.type == "id":
+    print(f'Getting ways with IDs between {args.min_id} and {args.max_id}')
+    feats = get_ways_by_ids(api, args.min_id, args.max_id, args.source_filter)
 
-    # If bbox is chosen, run get_ways_by_bbox to get a collection of features
-    if args.type == "bbox":
-        bbox = {'left': 97.295,'bottom': 5.397,'right': 105.732,'top': 20.468}
-        print(f'Getting ways in the following Thai bbox: {bbox}')
-        feats = get_ways_by_bbox(api, bbox)
+    # # If bbox is chosen, run get_ways_by_bbox to get a collection of features
+    # if args.type == "bbox":
+    #     bbox = {'left': 97.295,'bottom': 5.397,'right': 105.732,'top': 20.468}
+    #     print(f'Getting ways in the following Thai bbox: {bbox}')
+    #     feats = get_ways_by_bbox(api, bbox)
 
     # After getting all the ways, create a feature collection
     fc = geojson.FeatureCollection(feats)
