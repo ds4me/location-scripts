@@ -6,6 +6,7 @@ import argparse
 import os
 from datetime import timezone
 import configparser
+import re
 
 def create_feature(way, nodes):
     coords = []
@@ -47,15 +48,12 @@ def simplify_node(nodeObj):
     return node
 
 
-def get_ways_by_ids(api, min_id, max_id):
+def get_ways_by_ids(api, min_id, max_id, source_filter):
     # Create an empty list for geojson features
     feats = []
 
     # Loop through way IDs and create geojson features
     for i in range(min_id, max_id):
-
-        # Print which way is being tested
-        print(f'Trying to get way id {i}...')
 
         # Try to get the full way information from the api
         try:
@@ -75,16 +73,20 @@ def get_ways_by_ids(api, min_id, max_id):
 
                 # If it's the way, simply add all the details to the way variable
                 if obj['type'] == 'way':
-                    way = obj
+                    if source_filter and not re.match(source_filter, obj['data']['tag']['source']):
+                        raise ValueError("Way source tag doesn't match supplied filter")
+                    else:
+                        way = obj
 
             # Create a feature from the way details and a list of the nodes and
             # append to the feats list
             feat = create_feature(way, nodes)
             feats.append(feat)
+            print(f'Found way matching index {i}')
 
         # If an exception is thrown, print it but keep going through the for loop
         except Exception as e:
-            print(f'Skipping index {i} because the following exception: {e}')
+            print(f'Skipping index {i}: {e}')
             continue
 
     return feats
@@ -135,10 +137,11 @@ def main():
 
     # Add and parse the main arguments - min and max way IDs and the output file location
     parser = argparse.ArgumentParser(description="Script to create geojson by querying way IDs in local OSM server")
-    parser.add_argument('type', choices=["id","bbox"], help="Type of query - id loops through min/max ids, bbox pulls all values from bbox")
-    parser.add_argument('-min_id', dest="min_id", default="1", help="Minimum way ID to check", type=int)
-    parser.add_argument('-max_id', dest="max_id", default="1000", help="Maximum way ID to check", type=int)
+    # parser.add_argument('type', choices=["id","bbox"], help="Type of query - id loops through min/max ids, bbox pulls all values from bbox")
     parser.add_argument('output_file', type=path_with_geojson, help="Output file location, must end with '.geojson'")
+    parser.add_argument('--min', dest="min_id", default="1", help="Minimum way ID to check", type=int)
+    parser.add_argument('--max', dest="max_id", default="1000", help="Maximum way ID to check", type=int)
+    parser.add_argument('-s', '--source', dest="source_filter", help="Regex string of source values to filter on")
     args = parser.parse_args()
 
     # Read the config.ini file to get the username and password
@@ -151,10 +154,13 @@ def main():
     pw = config['local_osm']['password']
     api = osmapi.OsmApi(api=url, username=usr, password=pw)
 
+    # Print source filter if applicable
+    if args.source_filter: print(f'Filtering output by the following source tag(s): {args.source_filter}')
+
     # If id chosen, run get_ways_by_ids to get a collection of features
     if args.type == "id":
         print(f'Getting ways with IDs between {args.min_id} and {args.max_id}')
-        feats = get_ways_by_ids(api, args.min_id, args.max_id)
+        feats = get_ways_by_ids(api, args.min_id, args.max_id, args.source_filter)
 
     # If bbox is chosen, run get_ways_by_bbox to get a collection of features
     if args.type == "bbox":
