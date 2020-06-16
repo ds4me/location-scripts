@@ -6,9 +6,10 @@ import requests
 import json
 import overpy
 
+# TODO: Add your credentials!
 # osm credentials
-REAL_OSM_USER = "elijahfilip@gmail.com"
-REAL_OSM_PASS = "Xh2^2pO%3OqT"
+REAL_OSM_USER = ""
+REAL_OSM_PASS = ""
 
 # bvbdosm credentials
 LOCAL_OSM_URL = 'https://bvbdosm.herokuapp.com'
