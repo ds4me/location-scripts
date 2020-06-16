@@ -15,7 +15,7 @@ REAL_OSM_USER = config['public_osm']['username']
 REAL_OSM_PASS = config['public_osm']['password']
 
 # bvbdosm credentials
-LOCAL_OSM_URL = 'https://bvbdosm.herokuapp.com'
+LOCAL_OSM_URL = config['local_osm']['url']
 LOCAL_OSM_USER = config['local_osm']['username']
 LOCAL_OSM_PASS = config['local_osm']['password']
 

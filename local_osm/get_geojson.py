@@ -146,7 +146,7 @@ def main():
     config.read('config.ini')
 
     # Get api for local OSM instance
-    url = 'https://bvbdosm.herokuapp.com'
+    url = config['local_osm']['url']
     usr = config['local_osm']['username']
     pw = config['local_osm']['password']
     api = osmapi.OsmApi(api=url, username=usr, password=pw)
