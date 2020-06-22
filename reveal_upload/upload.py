@@ -317,19 +317,22 @@ def load_jurisdictions(id_parent_external, id_parent_opensrp='', id_parent_openm
         # add to openSRP
 
 def load_files():
-    geo_path = './toimport/geojson'
-    location_path = './toimport/locations'
+    global skip_csv
+    global country
+
+    geo_path = './toimport/geojson/{0}'.format(country)
+    location_path = './toimport/location/{0}'.format(country)
     sql_path = '../sql'
     files = []
     data = ''
-    global skip_csv
+   
     # r=root, d=directories, f = files
     logging.info('Importing files:')
     cur = conn.cursor()
     logging.info('   Truncating database tables')
     sql = ("truncate table geojson_file; truncate table changeset; truncate table mergeset; truncate table jurisdiction_master; truncate table structure_master;")
-    cur.execute(sql)
-    conn.commit()
+    #cur.execute(sql)
+    #conn.commit()
     logging.info('   Loading geoJSON files @ {0}'.format(geo_path))
     for r, d, f in os.walk(geo_path):
         for file in f:
@@ -343,24 +346,38 @@ def load_files():
                     if data != '':
                         geo = json.dumps(data).replace("'", "")
                         sql = ("insert into geojson_file (file, file_name) values ('{0}', '{1}');").format(geo, file)
-                        cur.execute(sql)
-                        conn.commit()
+                        #cur.execute(sql)
+                        #conn.commit()
+                    else:
+                        logging.info("no data")
+
 
     logging.info('   Running SQL: {0}'.format('insert_changeset.sql'))
     with open('{0}/{1}'.format(sql_path, 'insert_changeset.sql')) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
-        cur.execute(sql)
-        conn.commit()
+       #cur.execute(sql)
+       #conn.commit()
 
     abspath = os.path.abspath('{0}/jurisdictions.csv'.format(location_path))
-    logging.info('   Importing master CSV file from: {0}'.format(abspath))
+    logging.info('   Importing master jurisdiction CSV file from: {0}'.format(abspath))
+    
     if skip_csv == 0:
         copy_sql = "COPY jurisdiction_master (id,externalid,parentid,status,name,geographiclevel,openmrs_id,type,coordinates) FROM STDIN DELIMITER '|' CSV HEADER;"
         cur.copy_expert(sql=copy_sql, file=open(abspath,"r"))
         conn.commit()
     else:
-        logging.info('  Skipping csv upload')
+        logging.info('  Skipping jurisdiction csv upload')
+
+    abspath = os.path.abspath('{0}/structure.csv'.format(location_path))
+    logging.info('   Importing master CSV structure file from: {0}'.format(abspath))
+    
+    if skip_csv == 0:
+        copy_sql = "COPY structure_master (id,externalid,parentid,status,name,geographiclevel,openmrs_id,type,coordinates) FROM STDIN DELIMITER '|' CSV HEADER;"
+        cur.copy_expert(sql=copy_sql, file=open(abspath,"r"))
+        conn.commit()
+    else:
+        logging.info('  Skipping structure csv upload')
 
 
     logging.info('   Running SQL: {0}'.format('run_merge.sql'))
@@ -387,15 +404,15 @@ def load_files():
         with open('{0}/{1}'.format(sql_path, 'add_suffix.sql')) as sql_file:
             sql = sql_file.read()
             logging.debug(sql)
-            cur.execute(sql)
+            #ur.execute(sql)
             conn.commit()
 
     logging.info('Completed load_files successfully')
 
 
 def total_structures(geographic_level):
-    sql = 'SELECT count(*)  from ' + ou_table + \
-        ' where process = true and geographicLevel = ' + str(geographic_level)
+    sql = "SELECT count(*)  from mergeset  \
+        where operation = 'i' and geographicLevel = " + str(geographic_level)
     cur = conn.cursor()
     cur.execute(sql)
     counts = cur.fetchall()
@@ -421,15 +438,16 @@ def load_structures():
     global locations_progress
     global jurisdiction_only
     global firstrun
+    global urlsd;
 
     geographic_level = int(jurisdiction_depth) + 1
     structures_total = total_structures(geographic_level)
     logging.info('Total structures to add: {0}'.format(structures_total))
 
-    sql = 'SELECT s.opensrp_id, s.externalId, s.externalParentId, s.name_en, s.name, s.geographicLevel, s.type, s.coordinates, 	s.openmrs_id , j.opensrp_id as opensrpparent_id	\
-		from ' + ou_table + ' 												\
-		s inner join ' + ou_table + ' j on j.externalId = s.externalparentId    \
-		where s.process = true and s.geographicLevel = ' + str(geographic_level) + ' order by s.id'
+    sql = "SELECT s.opensrp_id, s.externalId, s.externalParentId, s.name_en, s.name, s.geographicLevel, s.type, s.coordinates, 	s.openmrs_id , j.opensrp_id as opensrpparent_id	\
+		from  mergeset s											\
+		inner join mergeset j on j.externalId = s.externalparentId    \
+		where s.operation = 'i' and s.geographicLevel = " + str(geographic_level) + " order by s.id"
     logging.debug(sql)
     cur = conn.cursor()
     cur.execute(sql)
@@ -458,7 +476,8 @@ def load_structures():
                           'parent_id_openmrs'], location['name_local'], geographic_level, location['id_external'], location['geometry_type']))
         if(counter % 500 == 0) or counter == len(locations):
             URL = url_post_reveal_structure_batch.format(url_sd)
-            c = post_request(URL, json.dumps(structures))
+            logging.info(URL)
+            c = post_request(URL, json.dumps(structures),'i')
             logging.info(str(counter) + ' ' + c.text +
                          ' ' + location['id_external'])
             structures = []
@@ -515,8 +534,10 @@ def main(argv):
     	sys.exit()
     else:
     	cnconf = config[country]
+
 	database = '{0}_{1}'.format(config['db']['database'],country.replace('-','_'))
-	conn = psycopg2.connect(host=config['db']['host'], database=database, user=config['db']['user'], password=config['db']['password'])
+    logging.info('database: {0}'.format(database))
+    conn = psycopg2.connect(host=config['db']['host'], database=database, user=config['db']['user'], password=config['db']['password'])
 
 	#functions
     if function == 'load_jurisdictions':
@@ -533,10 +554,10 @@ def main(argv):
     elif function == 'load_files':
         load_files()
     elif function == 'load_structures':
+        url_sd = cnconf['url_sd']
         jurisdiction_depth = cnconf['jurisdiction_depth']
-        if ou_table == '':
-            print "Please specify a database table"
-        elif country == '':
+       # if ou_table == '':
+        if country == '':
             print "Please specify a country and environment e.g. th-st"
         else:
             load_structures()
