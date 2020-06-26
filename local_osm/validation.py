@@ -106,7 +106,7 @@ def check_size(gdf, min_area, max_area):
 
     # Filter out any foci that meet the criteria
     fociToCheck = gdf.loc[(gdf['geometry'].area <= min_area) | (gdf['geometry'].area >= max_area)].externalId
-    print("Foci sizes okay!") if len(fociToCheck) == 0 else print(f'Check the size of the following foci: {[i for i in fociToCheck]}')
+    print("Foci sizes okay!") if len(fociToCheck) == 0 else print(f'Check the size of the following {len(fociToCheck)} foci: {[i for i in fociToCheck]}')
 
 
 def check_hierarchy(gdf, rgdf):
@@ -131,7 +131,7 @@ def check_hierarchy(gdf, rgdf):
         if len(gdf.loc[gdf.externalId == v]) > 0: missing.remove(v)
 
     # Return a list of missing hierarchy IDs
-    print("No missing hierarchy members!") if len(missing) == 0 else print(f"Missing hierarchy members: {missing}")
+    print("No missing hierarchy members!") if len(missing) == 0 else print(f"Missing {len(missing)} hierarchy members: {missing}")
 
 
 def check_overlaps(gdf, rgdf):
