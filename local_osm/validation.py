@@ -1,6 +1,8 @@
 import argparse
 import paramiko
+from scp import SCPClient
 import os
+import sys
 import geopandas as gpd
 import math
 import rtree
@@ -34,28 +36,66 @@ def load_and_validate_geojson(gjsonLoc):
 
 
 def get_reveal_gdf():
-    # priv_key_loc = "C:\\Users\\elija\\AppData\\Local\\Packages\\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\\LocalState\\rootfs\\home\\ubuntu\\.ssh\\id_rsa"
-    # k = paramiko.RSAKey.from_private_key_file(priv_key_loc)
-    # ssh = paramiko.SSHClient()
-    # ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    # ssh.connect(hostname="134.209.198.201", username="root", pkey=k)
-    # ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("cd location-scripts/reveal_upload && ./get_csv_thailand.sh")
-    # for line in iter(ssh_stdout.readline,""):
-    #     print(line, end="")
-    # for line in iter(ssh_stderr.readline,""):
-    #     print(line, end="")
-    ## TODO: scp root@134.209.198.201:root/location-scripts/reveal_upload/toimport/locations/jurisdictions.csv
-    # ssh.close()
 
+    # Get the location of the where the jurisdiction.csv file will be stored - local folder
+    jurisdictionFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "jurisdictions.csv")
+
+    # Remove the jurisdictions file if it's already there
+    if os.path.exists(jurisdictionFile):
+        os.remove(jurisdictionFile)
+
+    # Get the private key location and create RSAKey, note that this will need to be changed for other computers
+    priv_key_loc = "C:\\Users\\elija\\AppData\\Local\\Packages\\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\\LocalState\\rootfs\\home\\ubuntu\\.ssh\\id_rsa"
+    k = paramiko.RSAKey.from_private_key_file(priv_key_loc)
+
+    # Create a ssh client
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    # Connect to the staging server
+    ssh.connect(hostname="134.209.198.201", username="root", pkey=k)
+
+    # Run the get_csv_thailand.sh script to get the most recent data from Reveal
+    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("cd location-scripts/reveal_upload && ./get_csv_thailand.sh")
+
+    # While loop until the command is completed
+    while not ssh_stdout.channel.exit_status_ready():
+        continue
+    # [print(line,end="") for line in iter(ssh_stdout.readline, "")]
+    # [print(line,end="") for line in iter(ssh_stderr.readline, "")]
+
+    # Track scp download progress
+    def progress(filename, size, sent):
+        sys.stdout.write("%s\'s progress: %.2f%%   \r" % (filename, float(sent)/float(size)*100) )
+
+    # Get the SCPClient
+    scp = SCPClient(ssh.get_transport(), progress=progress)
+
+    # Get the jurisdictions.csv and print a new line
+    scp.get('/root/location-scripts/reveal_upload/toimport/locations/jurisdictions.csv')
+    sys.stdout.write('\n')
+
+    # Close both the scp and ssh connections
+    scp.close()
+    ssh.close()
+
+    # Convert CSV coodinates to GeoJSON polygons
     def get_polygon(row):
         feat = geojson.Feature(geometry={
                 "type": "Polygon",
                 "coordinates": json.loads(row.coordinates)})
         return shapely.geometry.Polygon(list(geojson.utils.coords(feat)))
 
-    revealCSV = pd.read_csv("C:/Users/elija/Desktop/jurisdictions.csv", delimiter="|")
-    geom = revealCSV.apply(lambda row: get_polygon(row), axis=1)
+    # Load the CSV file
+    revealCSV = pd.read_csv(jurisdictionFile, delimiter='|')
+
+    # Create the geom
+    geom = revealCSV.apply(lambda row: get_polygon(row),axis=1)
+
+    # Create the GeoDataFrame
     rgdf = gpd.GeoDataFrame(revealCSV, crs="EPSG:4326", geometry=geom)
+
+    # return the GDF with renamed columns
     return rgdf.rename({'externalid': 'externalId', 'parentid': 'parentId', 'geographiclevel': 'geographicLevel'}, axis=1)
 
 

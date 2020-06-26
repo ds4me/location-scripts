@@ -10,3 +10,4 @@ reveal_upload/toimport/locations/*.json
 reveal_upload/toimport/locations/*.geojson
 reveal_upload/toimport/locations/*.csv
 local_osm/config.ini
+local_osm/*.csv
