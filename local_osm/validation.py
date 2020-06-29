@@ -216,7 +216,7 @@ def main():
     check_size(gdf, min_area, max_area)
 
     # Check hierarchy
-    print('Checking for graps in the hierarchy...')
+    print('Checking for gaps in the hierarchy...')
     check_hierarchy(gdf,rgdf)
 
     # Check self overlaps
