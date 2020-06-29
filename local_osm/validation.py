@@ -120,8 +120,6 @@ def check_hierarchy(gdf, rgdf):
 
     # Get hierarchy needs
     justFoci = gdf.loc[(gdf.geographicLevel == '5') | (gdf.geographicLevel == 5)]
-    print(justFoci.externalId)
-    print(justFoci.externalId.str.strip())
     uniqueProvs = justFoci.externalId.str.slice(0,2).unique()
     uniqueDists = justFoci.externalId.str.slice(0,4).unique()
     uniqueSubDists = justFoci.externalId.str.slice(0,6).unique()
