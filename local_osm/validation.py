@@ -32,11 +32,11 @@ def load_and_validate_geojson(gjsonLoc):
             raise TypeError(f'The input GeoJSON is missing the {i} column')
 
     # Return the GeoDataFrame
+    print(f'Loaded geojson with {len(gdf)} foci')
     return gdf
 
 
-def get_reveal_gdf():
-
+def download_reveal_jurisdictions():
     # Get the location of the where the jurisdiction.csv file will be stored - local folder
     jurisdictionFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "jurisdictions.csv")
 
@@ -79,6 +79,12 @@ def get_reveal_gdf():
     scp.close()
     ssh.close()
 
+
+def get_reveal_gdf(jurisdictionFile):
+
+    if not jurisdictionFile:
+        download_reveal_jurisdictions()
+
     # Convert CSV coodinates to GeoJSON polygons
     def get_polygon(row):
         feat = geojson.Feature(geometry={
@@ -96,6 +102,7 @@ def get_reveal_gdf():
     rgdf = gpd.GeoDataFrame(revealCSV, crs="EPSG:4326", geometry=geom)
 
     # return the GDF with renamed columns
+    print(f'Loaded {len(rgdf)} foci from Reveal')
     return rgdf.rename({'externalid': 'externalId', 'parentid': 'parentId', 'geographiclevel': 'geographicLevel'}, axis=1)
 
 
@@ -112,7 +119,9 @@ def check_size(gdf, min_area, max_area):
 def check_hierarchy(gdf, rgdf):
 
     # Get hierarchy needs
-    justFoci = gdf.loc[gdf.geographicLevel == '5']
+    justFoci = gdf.loc[(gdf.geographicLevel == '5') | (gdf.geographicLevel == 5)]
+    print(justFoci.externalId)
+    print(justFoci.externalId.str.strip())
     uniqueProvs = justFoci.externalId.str.slice(0,2).unique()
     uniqueDists = justFoci.externalId.str.slice(0,4).unique()
     uniqueSubDists = justFoci.externalId.str.slice(0,6).unique()
@@ -128,7 +137,7 @@ def check_hierarchy(gdf, rgdf):
 
     # If not in Reveal, check against itself as well
     for v in missing:
-        if len(gdf.loc[gdf.externalId == v]) > 0: missing.remove(v)
+        if len(gdf.loc[gdf.externalId.astype(str) == v]) > 0: missing.remove(v)
 
     # Return a list of missing hierarchy IDs
     print("No missing hierarchy members!") if len(missing) == 0 else print(f"Missing {len(missing)} hierarchy members: {missing}")
@@ -199,6 +208,7 @@ def valid_path(gjson):
 def main():
     parser = argparse.ArgumentParser(description="Script to validate GeoJSON foci before uploading to Reveal")
     parser.add_argument('geojson', type=valid_path, help="GeoJSON file to validate")
+    parser.add_argument('-j','--jurisdictions', dest="jurisdictionFile", type=valid_path, help="Optional file location for pre-downloaded jurisdictions file")
     args = parser.parse_args()
 
     # Load GeoJSON
@@ -207,7 +217,7 @@ def main():
 
     # Get a GeoDataFrame of what is currently in Reveal
     print('Loading the current Reveal foci...')
-    rgdf = get_reveal_gdf()
+    rgdf = get_reveal_gdf(args.jurisdictionFile)
 
     # Check for size. min_area equal to the size of buffered b1b2 foci, max area is 5km x 5km
     min_area = math.pi * 25 ** 2
