@@ -7,7 +7,6 @@ import os
 from datetime import timezone
 import configparser
 import re
-import numpy as np
 
 def create_feature(way, nodes):
     coords = []
