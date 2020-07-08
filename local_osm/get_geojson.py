@@ -49,15 +49,6 @@ def simplify_node(nodeObj):
     return node
 
 
-def print_results_table(outcomeLists):
-    groupedVals = np.split(outcomeLists, np.where(np.diff(outcomeLists) != 1)[0] + 1)
-
-    for v in groupedVals:
-        ['success', f'{v[0]}-{v[len(v)-1]}']
-    # for l in outcomeLists:
-    #     np.split(foundIDs, np.where(np.diff(foundIDs) != 1)[0] + 1)
-
-
 def get_ways_by_ids(api, min_id, max_id, source_filter):
     # Create an empty list for geojson features
     feats = []
