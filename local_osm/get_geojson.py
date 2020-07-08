@@ -7,6 +7,7 @@ import os
 from datetime import timezone
 import configparser
 import re
+import numpy as np
 
 def create_feature(way, nodes):
     coords = []
@@ -48,12 +49,28 @@ def simplify_node(nodeObj):
     return node
 
 
+def print_results_table(outcomeLists):
+    groupedVals = np.split(outcomeLists, np.where(np.diff(outcomeLists) != 1)[0] + 1)
+
+    for v in groupedVals:
+        ['success', f'{v[0]}-{v[len(v)-1]}']
+    # for l in outcomeLists:
+    #     np.split(foundIDs, np.where(np.diff(foundIDs) != 1)[0] + 1)
+
+
 def get_ways_by_ids(api, min_id, max_id, source_filter):
     # Create an empty list for geojson features
     feats = []
 
+    # Create lists for possible outcomes
+    foundIDs = []
+    notFoundIDs = []
+    noSourceMatchIDs = []
+    otherExceptionIDs = []
+
     # Loop through way IDs and create geojson features
-    for i in range(min_id, max_id):
+    for i in range(min_id, max_id + 1):
+        print(f'Progress: {round((i-min_id)/(max_id - min_id) * 100, 1)}%', end="\r", flush=True)
 
         # Try to get the full way information from the api
         try:
@@ -82,13 +99,28 @@ def get_ways_by_ids(api, min_id, max_id, source_filter):
             # append to the feats list
             feat = create_feature(way, nodes)
             feats.append(feat)
-            print(f'Found way matching index {i}')
+            foundIDs.append(i)
+            # print(f'Found way matching index {i}', end="\r", flush=True)
 
         # If an exception is thrown, print it but keep going through the for loop
         except Exception as e:
-            print(f'Skipping index {i}: {e}')
+            if "404 - Not Found" in str(e):
+                notFoundIDs.append(i)
+            elif "supplied filter" in str(e):
+                noSourceMatchIDs.append(i)
+            else:
+                otherExceptionIDs.append(i)
+                print(f'Exception for id={i}: {e}')
             continue
 
+    # Print the results
+    print("")
+    print(f'Foci found in ID range: {len(foundIDs)}')
+    print(f'Foci not found in ID range: {len(notFoundIDs)}')
+    if(len(noSourceMatchIDs) >= 1):
+        print(f'Foci found in ID range but do not match provided source filter: {len(noSourceMatchIDs)}')
+    if(len(otherExceptionIDs) >= 1):
+        print(f'IDs with other exceptions: {len(otherExceptionIDs)}')
     return feats
 
 
