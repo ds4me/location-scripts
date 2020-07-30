@@ -28,6 +28,7 @@ def create_feature(way, nodes):
             "coordinates":[coords]
         },
         properties={
+            "osmId": way['data']['id'],
             "externalId": externalId,
             "externalParentId": externalParentId,
             "name": name,
