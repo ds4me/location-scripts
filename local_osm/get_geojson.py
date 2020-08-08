@@ -7,6 +7,7 @@ import os
 from datetime import timezone
 import configparser
 import re
+import requests
 
 def create_feature(way, nodes):
     coords = []
@@ -161,6 +162,7 @@ def main():
     # Add and parse the main arguments - min and max way IDs and the output file location
     parser = argparse.ArgumentParser(description="Script to create geojson by querying way IDs in local OSM server")
     # parser.add_argument('type', choices=["id","bbox"], help="Type of query - id loops through min/max ids, bbox pulls all values from bbox")
+    parser.add_argument('-t', '--type', dest='type', choices=['api','id'], default='api', help='Type of query, defaults to api')
     parser.add_argument('output_file', type=path_with_geojson, help="Output file location, must end with '.geojson'")
     parser.add_argument('--min', dest="min_id", default="1", help="Minimum way ID to check", type=int)
     parser.add_argument('--max', dest="max_id", default="1000", help="Maximum way ID to check", type=int)
@@ -171,28 +173,38 @@ def main():
     config = configparser.ConfigParser()
     config.read('config.ini')
 
-    # Get api for local OSM instance
-    url = config['local_osm']['url']
-    usr = config['local_osm']['username']
-    pw = config['local_osm']['password']
-    api = osmapi.OsmApi(api=url, username=usr, password=pw)
+    if args.type == 'id':
+        # Get api for local OSM instance
+        url = config['local_osm']['url']
+        usr = config['local_osm']['username']
+        pw = config['local_osm']['password']
+        api = osmapi.OsmApi(api=url, username=usr, password=pw)
 
-    # Print source filter if applicable
-    if args.source_filter: print(f'Filtering output by the following source tag(s): {args.source_filter}')
+        # Print source filter if applicable
+        if args.source_filter: print(f'Filtering output by the following source tag(s): {args.source_filter}')
 
-    # If id chosen, run get_ways_by_ids to get a collection of features
-    # if args.type == "id":
-    print(f'Getting ways with IDs between {args.min_id} and {args.max_id}')
-    feats = get_ways_by_ids(api, args.min_id, args.max_id, args.source_filter)
+        # If id chosen, run get_ways_by_ids to get a collection of features
+        # if args.type == "id":
+        print(f'Getting ways with IDs between {args.min_id} and {args.max_id}')
+        feats = get_ways_by_ids(api, args.min_id, args.max_id, args.source_filter)
 
-    # # If bbox is chosen, run get_ways_by_bbox to get a collection of features
-    # if args.type == "bbox":
-    #     bbox = {'left': 97.295,'bottom': 5.397,'right': 105.732,'top': 20.468}
-    #     print(f'Getting ways in the following Thai bbox: {bbox}')
-    #     feats = get_ways_by_bbox(api, bbox)
+        # # If bbox is chosen, run get_ways_by_bbox to get a collection of features
+        # if args.type == "bbox":
+        #     bbox = {'left': 97.295,'bottom': 5.397,'right': 105.732,'top': 20.468}
+        #     print(f'Getting ways in the following Thai bbox: {bbox}')
+        #     feats = get_ways_by_bbox(api, bbox)s
 
-    # After getting all the ways, create a feature collection
-    fc = geojson.FeatureCollection(feats)
+        # After getting all the ways, create a feature collection
+        fc = geojson.FeatureCollection(feats)
+
+    else:
+        # Request the ways from tne new api endpoint - SQL query returns formatted geojson
+        print('Getting ways from /api/get_all_ways api endpoint...')
+        url = config['local_osm']['url'] + '/api/get_all_ways'
+        r = requests.get(url)
+        fc = r.json()
+        print(f'Found {len(fc["features"])} features')
+
 
     # Save the feature collection to the output_file location
     with open(args.output_file, 'w', encoding='utf8') as f:
