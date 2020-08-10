@@ -11,25 +11,115 @@ import pandas as pd
 import json
 import geojson
 
-'''
-Validate on:
-1. Overlap
-    - Check in GeoJSON first, then check against Reveal?
-    - Option to move B1B2?
-2. Size
-    - Limits set by user?
-3. Hierarchy check?
-'''
+# def check_nulls_and_line_endings(gdf, colName):
+#     # Get a list of null values for the column
+#     nulls = gdf.loc[gdf[colName].isnull()]
+#
+#     # If there are nulls, print them and thrown an error
+#     if not nulls.empty:
+#         print(f'The {colName} column contains the following null values:')
+#         print(nulls)
+#         raise TypeError(f'The {colName} cannot contain null values')
+#
+#     # Otherwise, remove line endings for the name and convert numeric columns
+#     gdf[colName] = gdf[colName].str.strip() if colName == 'name' else pd.to_numeric(gdf[colName])
+#
+#     # Return updated GeoDataFrame
+#     return gdf
+#
+#
+# def name_check(gdf):
+#     # Check if the name column exists already, if not raise an error
+#     if 'name' not in list(gdf):
+#         raise TypeError(f'The input GeoJSON must contain a "name" column')
+#     else:
+#         # Otherwise, check for nulls and remove line endings
+#         gdf = check_nulls_and_line_endings(gdf,'name')
+#
+#     # Return updated GeoDataFrame
+#     return gdf
+#
+#
+# def external_id_check(gdf):
+#     # Check for externalId and description columns
+#     if 'externalId' not in list(gdf) and 'description' not in list(gdf):
+#         TypeError('The input GeoJSON must contain an "externalId" or "description" column')
+#
+#     # Change col name from description to externalId
+#     if 'externalId' not in list(gdf) and 'description' in list(gdf):
+#         gdf = gdf.rename(columns={'description': 'externalId'})
+#
+#     # Check for null values and fix line endings
+#     gdf = check_nulls_and_line_endings(gdf,'externalId')
+#
+#     # Return updated GeoDataFrame
+#     return gdf
+#
+#
+# def external_parent_id_check(gdf):
+#
+#     # Add an externalParentId, as needed
+#     if 'externalParentId' not in list(gdf):
+#         gdf['externalParentId'] = gdf['externalId'] // 100
+#     else:
+#         # Otherwise check for nulls and fix line endings
+#         gdf = check_nulls_and_line_endings(gdf, 'externalParentId')
+#
+#     # Return updated GeoDataFrame
+#     return gdf
+#
+#
+# def geographic_level_check(gdf):
+#
+#     # Add a geographicLevel column, if necessary
+#     if 'geographicLevel' not in list(gdf):
+#         gdf['geographicLevel'] = 5
+#     else:
+#         # Otherwise check for nulls and fix line endings
+#         gdf = check_nulls_and_line_endings(gdf, 'geographicLevel')
+#
+#     # Return updated GeoDataFrame
+#     return gdf
+
 
 def load_and_validate_geojson(gjsonLoc):
 
     # Get the GeoJSON from the file specified on the command line
     gdf = gpd.read_file(gjsonLoc)
 
-    # Validate that the geojson includes the necessary fields
+    # # Check for a name column
+    # gdf = name_check(gdf)
+    #
+    # # Check the externalId/description column
+    # gdf = external_id_check(gdf)
+    #
+    # # Check the externalParentId column
+    # gdf = external_parent_id_check(gdf)
+    #
+    # # Check the geographicLevel column
+    # gdf = geographic_level_check(gdf)
+
+    # Check that the columns are correct, there are no null values, and that there
+    # aren't any random newline characters in the fields
+    missingCols = []
+    colsWithNulls = []
+    colsWithNewLineIssues = []
     for i in ['name','externalId','externalParentId','geographicLevel']:
         if i not in list(gdf):
-            raise TypeError(f'The input GeoJSON is missing the {i} column')
+            missingCols.append(i)
+        else:
+            if not gdf.loc[gdf[i].isnull()].empty:
+                colsWithNulls.append(i)
+            if gdf[i].astype(str).str.contains('\n').any():
+                colsWithNewLineIssues.append(i)
+
+    # Raise errors if any of the above situations exist
+    if missingCols:
+        raise TypeError(f'The input GeoJSON must include the following missing columns: {", ".join(missingCols)}')
+    if colsWithNulls:
+        raise TypeError(f'Some values in the following columns are null: {", ".join(colsWithNulls)}')
+    if colsWithNewLineIssues:
+        raise TypeError(f'Some values in the following columns include newline characters: {", ".join(colsWithNewLineIssues)}')
 
     # Return the GeoDataFrame
     print(f'Loaded geojson with {len(gdf)} foci')
@@ -45,15 +135,16 @@ def download_reveal_jurisdictions():
         os.remove(jurisdictionFile)
 
     # Get the private key location and create RSAKey, note that this will need to be changed for other computers
-    priv_key_loc = "C:\\Users\\elija\\AppData\\Local\\Packages\\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\\LocalState\\rootfs\\home\\ubuntu\\.ssh\\id_rsa"
-    k = paramiko.RSAKey.from_private_key_file(priv_key_loc)
+    # pkey_loc = "C:\\Users\\elija\\AppData\\Local\\Packages\\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\\LocalState\\rootfs\\home\\ubuntu\\.ssh\\id_rsa"
+    pkey_loc = "C:/Users/efilip/.ssh/thai_upload"
+    pkey = paramiko.RSAKey.from_private_key_file(pkey_loc)
 
     # Create a ssh client
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     # Connect to the staging server
-    ssh.connect(hostname="134.209.198.201", username="root", pkey=k)
+    ssh.connect(hostname="134.209.198.201", username="root", pkey=pkey)
 
     # Run the get_csv_thailand.sh script to get the most recent data from Reveal
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("cd location-scripts/reveal_upload && ./get_csv_thailand.sh")
@@ -64,26 +155,30 @@ def download_reveal_jurisdictions():
     # [print(line,end="") for line in iter(ssh_stdout.readline, "")]
     # [print(line,end="") for line in iter(ssh_stderr.readline, "")]
 
-    # Track scp download progress
+    # Track scp download progress and get the filename
     def progress(filename, size, sent):
-        sys.stdout.write("%s\'s progress: %.2f%%   \r" % (filename, float(sent)/float(size)*100) )
+        progressString = f'{filename}\'s progress: {round(100 * (sent/size), 1)}%'
+        print(progressString, end="\r", flush=False)
 
     # Get the SCPClient
     scp = SCPClient(ssh.get_transport(), progress=progress)
 
     # Get the jurisdictions.csv and print a new line
     scp.get('/root/location-scripts/reveal_upload/toimport/locations/jurisdictions.csv')
-    sys.stdout.write('\n')
+    print(' ')
 
     # Close both the scp and ssh connections
     scp.close()
     ssh.close()
 
+    # return the location of the downloaded file
+    return jurisdictionFile
+
 
 def get_reveal_gdf(jurisdictionFile):
 
     if not jurisdictionFile:
-        download_reveal_jurisdictions()
+        jurisdictionFile = download_reveal_jurisdictions()
 
     # Convert CSV coodinates to GeoJSON polygons
     def get_polygon(row):
@@ -119,23 +214,23 @@ def check_size(gdf, min_area, max_area):
 def check_hierarchy(gdf, rgdf):
 
     # Get hierarchy needs
-    justFoci = gdf.loc[(gdf.geographicLevel == '5') | (gdf.geographicLevel == 5)]
-    uniqueProvs = justFoci.externalId.str.slice(0,2).unique()
-    uniqueDists = justFoci.externalId.str.slice(0,4).unique()
-    uniqueSubDists = justFoci.externalId.str.slice(0,6).unique()
-    uniqueVills = justFoci.externalId.str.slice(0,8).unique()
+    justFoci = gdf.loc[(gdf.geographicLevel.astype(str) == '5')]
+    uniqueProvs = justFoci.externalId.astype(str).str.slice(0,2).unique()
+    uniqueDists = justFoci.externalId.astype(str).str.slice(0,4).unique()
+    uniqueSubDists = justFoci.externalId.astype(str).str.slice(0,6).unique()
+    uniqueVills = justFoci.externalId.astype(str).str.slice(0,8).unique()
 
     # Create an empty list for missing externalIds
     missing = []
 
     # Check them against what is in Reveal
-    for uni in [uniqueProvs,uniqueDists, uniqueSubDists, uniqueVills]:
+    for uni in [uniqueProvs, uniqueDists, uniqueSubDists, uniqueVills]:
         for v in uni:
-            if len(rgdf.loc[rgdf.externalId.astype(str) == v]) == 0: missing.append(v)
+            if len(rgdf.loc[pd.to_numeric(rgdf.externalId) == pd.to_numeric(v)]) == 0: missing.append(v)
 
     # If not in Reveal, check against itself as well
     for v in missing:
-        if len(gdf.loc[gdf.externalId.astype(str) == v]) > 0: missing.remove(v)
+        if len(gdf.loc[pd.to_numeric(gdf.externalId) == pd.to_numeric(v)]) > 0: missing.remove(v)
 
     # Return a list of missing hierarchy IDs
     print("No missing hierarchy members!") if len(missing) == 0 else print(f"Missing {len(missing)} hierarchy members: {missing}")
@@ -196,17 +291,30 @@ def check_overlaps(gdf, rgdf):
     print("No overlaps!") if len(overlaps) == 0 else print(f"Fix the following {len(overlaps)} overlapping foci: {overlaps}")
 
 
-def valid_path(gjson):
+def valid_geojson(gjson):
     if os.path.isfile(gjson):
-        return gjson
+        if gjson.endswith('.geojson'):
+            return gjson
+        else:
+            raise argparse.ArgumentTypeError(f'File must end with .geojson')
     else:
         raise argparse.ArgumentTypeError(f'{gjson} is not a valid file')
 
 
+def valid_csv(csv):
+    if os.path.isfile(csv):
+        if csv.endswith('.csv'):
+            return csv
+        else:
+            raise argparse.ArgumentTypeError(f'File must end with .csv')
+    else:
+        raise argparse.ArgumentTypeError(f'{csv} is not a valid file')
+
+
 def main():
     parser = argparse.ArgumentParser(description="Script to validate GeoJSON foci before uploading to Reveal")
-    parser.add_argument('geojson', type=valid_path, help="GeoJSON file to validate")
-    parser.add_argument('-j','--jurisdictions', dest="jurisdictionFile", type=valid_path, help="Optional file location for pre-downloaded jurisdictions file")
+    parser.add_argument('geojson', type=valid_geojson, help="GeoJSON file to validate")
+    parser.add_argument('-j','--jurisdictions', dest="jurisdictionFile", type=valid_csv, help="Optional file location for pre-downloaded jurisdictions file")
     args = parser.parse_args()
 
     # Load GeoJSON
