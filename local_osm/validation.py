@@ -207,8 +207,15 @@ def check_size(gdf, min_area, max_area):
     if gdf.crs is not "EPSG:3857": gdf = gdf.to_crs("EPSG:3857")
 
     # Filter out any foci that meet the criteria
-    fociToCheck = gdf.loc[(gdf['geometry'].area <= min_area) | (gdf['geometry'].area >= max_area)].externalId
-    print("Foci sizes okay!") if len(fociToCheck) == 0 else print(f'Check the size of the following {len(fociToCheck)} foci: {[i for i in fociToCheck]}')
+    smallFoci = gdf.loc[gdf['geometry'].area <= min_area].externalId
+    largeFoci = gdf.loc[gdf['geometry'].area >= max_area].externalId
+
+    if len(smallFoci):
+        print(f'Verify that the following small foci are correct: {[i for i in smallFoci]}')
+    if len(largeFoci):
+        print(f'Verify that the following large foci are correct: {[i for i in largeFoci]}')
+    if not len(smallFoci) and not len(largeFoci):
+        print("Foci sizes are okay!")
 
 
 def check_hierarchy(gdf, rgdf):
