@@ -320,28 +320,34 @@ def main():
     # Load GeoJSON
     print('Loading the supplied GeoJSON...')
     gdf = load_and_validate_geojson(args.geojson)
+    print('')
 
     # Get a GeoDataFrame of what is currently in Reveal
     print('Loading the current Reveal foci...')
     rgdf = get_reveal_gdf(args.jurisdictionFile)
+    print('')
 
     # Check for size. min_area equal to the size of buffered b1b2 foci, max area is 5km x 5km
     min_area = math.pi * 25 ** 2
     max_area = 5000 * 5000
     print(f'Checking foci that are smaller than {round(min_area)}m^2 or larger than {round(max_area/1000000)}km^2...')
     check_size(gdf, min_area, max_area)
+    print('')
 
     # Check hierarchy
     print('Checking for gaps in the hierarchy...')
     check_hierarchy(gdf,rgdf)
+    print('')
 
     # Check self overlaps
     print('Checking for self overlaps...')
     check_overlaps(gdf,gdf)
+    print('')
 
     # Check Reveal overlaps
     print('Checking for overlaps with current Reveal foci...')
     check_overlaps(gdf,rgdf)
+    print('')
 
 
 if __name__ == '__main__':
