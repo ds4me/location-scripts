@@ -20,7 +20,8 @@ LOCAL_OSM_USER = config['local_osm']['username']
 LOCAL_OSM_PASS = config['local_osm']['password']
 
 # Required changeset description
-CHANGESET_DESCRIPTION = 'Add all existing foci'
+# CHANGESET_DESCRIPTION = 'Add all existing foci'
+CHANGESET_DESCRIPTION = 'Add focus from OSM whose boundaries have changed (6305040101)'
 
 
 # TODO: Add in addition information from the masterlist - classification, english name, etc.
@@ -65,13 +66,19 @@ def push_to_local_osm(ways):
 # TODO: Add the source string for WHO enumerated foci
 def get_osm_ways():
     print('Running Overpass query to get OSM ways, note that this may take a bit...')
-    overpassApi = overpy.Overpass()
+    overpassApi = overpy.Overpass(url="https://lz4.overpass-api.de/api/interpreter")
     r = overpassApi.query("""
     area["name:en"="Thailand"] ->.a;
-    way["source"~"BVBDMAY2019|WHO2019"]["description"~"."](area.a);
+    way["description"="6305040101"](area.a);
     (._;>;);
     out geom;
     """)
+    # r = overpassApi.query("""
+    # area["name:en"="Thailand"] ->.a;
+    # way["source"~"BVBDMAY2019|WHO2019"]["description"~"."](area.a);
+    # (._;>;);
+    # out geom;
+    # """)
     print(f'num ways: {len(r.ways)}')
     return r.ways
 
