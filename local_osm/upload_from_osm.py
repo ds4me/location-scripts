@@ -20,7 +20,7 @@ LOCAL_OSM_USER = config['local_osm']['username']
 LOCAL_OSM_PASS = config['local_osm']['password']
 
 # Required changeset description
-CHANGESET_DESCRIPTION = 'Add all existing foci'
+CHANGESET_DESCRIPTION = 'Re-add BVBDMAY2019 and WHO2019 foci, add DVBD2020 foci from OSM'
 
 
 # TODO: Add in addition information from the masterlist - classification, english name, etc.
@@ -68,7 +68,7 @@ def get_osm_ways():
     overpassApi = overpy.Overpass(url="https://lz4.overpass-api.de/api/interpreter")
     r = overpassApi.query("""
     area["name:en"="Thailand"] ->.a;
-    way["source"~"BVBDMAY2019|WHO2019"]["description"~"."](area.a);
+    way["source"~"BVBDMAY2019|WHO2019|DVBD2020"]["description"~"."](area.a);
     (._;>;);
     out geom;
     """)

@@ -211,9 +211,11 @@ def check_size(gdf, min_area, max_area):
     largeFoci = gdf.loc[gdf['geometry'].area >= max_area].externalId
 
     if len(smallFoci):
-        print(f'Verify that the following small foci are correct: {[i for i in smallFoci]}')
+        singleLineSmallFoci = "\n".join(map(str,smallFoci))
+        print(f'Verify that the following small foci are correct: \n{singleLineSmallFoci}')
     if len(largeFoci):
-        print(f'Verify that the following large foci are correct: {[i for i in largeFoci]}')
+        singleLineLargeFoci = "\n".join(map(str, largeFoci))
+        print(f'Verify that the following large foci are correct: \n{singleLineLargeFoci}')
     if not len(smallFoci) and not len(largeFoci):
         print("Foci sizes are okay!")
 
@@ -240,7 +242,8 @@ def check_hierarchy(gdf, rgdf):
         if len(gdf.loc[pd.to_numeric(gdf.externalId) == pd.to_numeric(v)]) > 0: missing.remove(v)
 
     # Return a list of missing hierarchy IDs
-    print("No missing hierarchy members!") if len(missing) == 0 else print(f"Missing {len(missing)} hierarchy members: {missing}")
+    singleLineMissing = "\n".join(map(str, missing))
+    print("No missing hierarchy members!") if len(missing) == 0 else print(f"Missing {len(missing)} hierarchy members: \n{singleLineMissing}")
 
 
 def check_overlaps(gdf, rgdf):
@@ -293,9 +296,11 @@ def check_overlaps(gdf, rgdf):
         # any previous overlap entries, add it to the overlaps list
         if len(overlappingFoci) > 0 and geoID not in overlappedFoci:
             overlappedFoci.extend(overlappingFoci)
-            overlaps.append({"externalId": geoID, "overlaps": overlappingFoci})
+            centroid = gdf.iloc[ind]['geometry'].centroid
+            overlaps.append({"externalId": geoID, "overlaps": overlappingFoci, "focusCentroid": (centroid.y, centroid.x)})
 
-    print("No overlaps!") if len(overlaps) == 0 else print(f"Fix the following {len(overlaps)} overlapping foci: {overlaps}")
+    singleLineOverlaps = "\n".join(map(str, overlaps))
+    print("No overlaps!") if len(overlaps) == 0 else print(f'Fix the following {len(overlaps)} overlapping foci: \n{singleLineOverlaps}')
 
 
 def valid_geojson(gjson):
