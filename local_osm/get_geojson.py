@@ -217,6 +217,8 @@ def main():
         r = requests.get(url)
         fc = r.json()
         print(f'Found {len(fc["features"])} features')
+
+        # Clean the feature collection for upload if the flag is present
         if args.clean_for_upload:
             fc = clean_for_upload(fc)
 

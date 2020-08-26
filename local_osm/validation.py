@@ -211,14 +211,21 @@ def check_size(gdf, min_area, max_area):
     largeFoci = gdf.loc[gdf['geometry'].area >= max_area].externalId
 
     if len(smallFoci):
+        smallFoci = smallFoci.sort_values()
         singleLineSmallFoci = "\n".join(map(str,smallFoci))
-        print(f'Verify that the following small foci are correct: \n{singleLineSmallFoci}')
+        print(f'Verify that the following {len(smallFoci)} small foci are correct: \n{singleLineSmallFoci}')
     if len(largeFoci):
+        largeFoci = largeFoci.sort_values()
         singleLineLargeFoci = "\n".join(map(str, largeFoci))
-        print(f'Verify that the following large foci are correct: \n{singleLineLargeFoci}')
+        print(f'Verify that the following {len(largeFoci)} large foci are correct: \n{singleLineLargeFoci}')
     if not len(smallFoci) and not len(largeFoci):
         print("Foci sizes are okay!")
 
+def print_missing_hierarchy_members(list,type):
+    if len(list):
+        list.sort()
+        singleLineVals = "\n".join(map(str,list))
+        print(f'Missing {len(list)} {type}: \n{singleLineVals}')
 
 def check_hierarchy(gdf, rgdf):
 
@@ -241,9 +248,14 @@ def check_hierarchy(gdf, rgdf):
     for v in missing:
         if len(gdf.loc[pd.to_numeric(gdf.externalId) == pd.to_numeric(v)]) > 0: missing.remove(v)
 
-    # Return a list of missing hierarchy IDs
-    singleLineMissing = "\n".join(map(str, missing))
-    print("No missing hierarchy members!") if len(missing) == 0 else print(f"Missing {len(missing)} hierarchy members: \n{singleLineMissing}")
+    # Print the number of missing hierarcy members by category and list all the members
+    if len(missing) == 0:
+        print('No missing hierarchy members!')
+    else:
+        print_missing_hierarchy_members([x for x in missing if len(str(x)) == 2], 'provinces')
+        print_missing_hierarchy_members([x for x in missing if len(str(x)) == 4], 'districts')
+        print_missing_hierarchy_members([x for x in missing if len(str(x)) == 6], 'sub-districts')
+        print_missing_hierarchy_members([x for x in missing if len(str(x)) == 8], 'villages')
 
 
 def check_overlaps(gdf, rgdf):
@@ -299,6 +311,7 @@ def check_overlaps(gdf, rgdf):
             centroid = gdf.iloc[ind]['geometry'].centroid
             overlaps.append({"externalId": geoID, "overlaps": overlappingFoci, "focusCentroid": (centroid.y, centroid.x)})
 
+    overlaps.sort(key=lambda x: x['externalId'])
     singleLineOverlaps = "\n".join(map(str, overlaps))
     print("No overlaps!") if len(overlaps) == 0 else print(f'Fix the following {len(overlaps)} overlapping foci: \n{singleLineOverlaps}')
 
