@@ -144,6 +144,18 @@ def get_ways_by_ids(api, min_id, max_id, source_filter):
 #
 #     return feats
 
+def clean_for_upload(fc):
+    for feature in fc['features']:
+        props = feature['properties']
+        id = int(props['description'].strip())
+        if len(str(id)) is not 10:
+            raise TypeError(f'The description tag for this way is not a 10-digit code: {props}')
+        props['externalId'] = id
+        props['geographicLevel'] = 5
+        props['externalParentId'] = id // 100
+        del props['description']
+    return fc
+
 
 def path_with_geojson(saveLoc):
     separator = "/" if "/" in saveLoc else "\\"
@@ -167,6 +179,7 @@ def main():
     parser.add_argument('--min', dest="min_id", default="1", help="Minimum way ID to check", type=int)
     parser.add_argument('--max', dest="max_id", default="1000", help="Maximum way ID to check", type=int)
     parser.add_argument('-s', '--source', dest="source_filter", help="Regex string of source values to filter on")
+    parser.add_argument('-c', '--clean_for_upload', action='store_true', help="Change 'description' column to 'externalId', remove line-endings, add 'externalParentId', and add 'geograpicLevel' columns")
     args = parser.parse_args()
 
     # Read the config.ini file to get the username and password
@@ -204,7 +217,8 @@ def main():
         r = requests.get(url)
         fc = r.json()
         print(f'Found {len(fc["features"])} features')
-
+        if args.clean_for_upload:
+            fc = clean_for_upload(fc)
 
     # Save the feature collection to the output_file location
     with open(args.output_file, 'w', encoding='utf8') as f:
