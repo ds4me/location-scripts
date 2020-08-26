@@ -10,6 +10,7 @@ import shapely
 import pandas as pd
 import json
 import geojson
+import numpy as np
 
 # def check_nulls_and_line_endings(gdf, colName):
 #     # Get a list of null values for the column
@@ -81,6 +82,13 @@ import geojson
 #     # Return updated GeoDataFrame
 #     return gdf
 
+def print_hierarchy_details(gdf, name):
+    print(f'Loaded {name} with {len(gdf)} features:')
+    print(f'{len(gdf.loc[gdf.externalId.astype(str).str.len() == 2])} provinces')
+    print(f'{len(gdf.loc[gdf.externalId.astype(str).str.len() == 4])} districts')
+    print(f'{len(gdf.loc[gdf.externalId.astype(str).str.len() == 6])} sub-districts')
+    print(f'{len(gdf.loc[gdf.externalId.astype(str).str.len() == 8])} villages')
+    print(f'{len(gdf.loc[gdf.externalId.astype(str).str.len() == 10])} foci')
 
 def load_and_validate_geojson(gjsonLoc):
 
@@ -122,7 +130,7 @@ def load_and_validate_geojson(gjsonLoc):
         raise TypeError(f'Some values in the following columns include newline characters: {", ".join(colsWithNewLineIssues)}')
 
     # Return the GeoDataFrame
-    print(f'Loaded geojson with {len(gdf)} foci')
+    print_hierarchy_details(gdf, 'geojson')
     return gdf
 
 
@@ -196,9 +204,18 @@ def get_reveal_gdf(jurisdictionFile):
     # Create the GeoDataFrame
     rgdf = gpd.GeoDataFrame(revealCSV, crs="EPSG:4326", geometry=geom)
 
-    # return the GDF with renamed columns
-    print(f'Loaded {len(rgdf)} foci from Reveal')
-    return rgdf.rename({'externalid': 'externalId', 'parentid': 'parentId', 'geographiclevel': 'geographicLevel'}, axis=1)
+    # rename the columns
+    rgdf = rgdf.rename({'externalid': 'externalId', 'parentid': 'parentId', 'geographiclevel': 'geographicLevel'}, axis=1)
+
+    # Remove those without an externalId
+    rgdf = rgdf.dropna(subset=['externalId'])
+
+    # Convert externalId to the correct dtype
+    rgdf['externalId'] = rgdf['externalId'].astype(np.int64)
+
+    # print the details and return the gdf
+    print_hierarchy_details(rgdf, 'Reveal jurisdictions')
+    return rgdf
 
 
 def check_size(gdf, min_area, max_area):
@@ -206,9 +223,12 @@ def check_size(gdf, min_area, max_area):
     # Convert the CRS to measure size in meters
     if gdf.crs is not "EPSG:3857": gdf = gdf.to_crs("EPSG:3857")
 
+    # Get just the foci
+    justFoci = gdf.loc[(gdf.geographicLevel.astype(str) == '5')]
+
     # Filter out any foci that meet the criteria
-    smallFoci = gdf.loc[gdf['geometry'].area <= min_area].externalId
-    largeFoci = gdf.loc[gdf['geometry'].area >= max_area].externalId
+    smallFoci = justFoci.loc[justFoci['geometry'].area <= min_area].externalId
+    largeFoci = justFoci.loc[justFoci['geometry'].area >= max_area].externalId
 
     if len(smallFoci):
         smallFoci = smallFoci.sort_values()
@@ -225,7 +245,7 @@ def print_missing_hierarchy_members(list,type):
     if len(list):
         list.sort()
         singleLineVals = "\n".join(map(str,list))
-        print(f'Missing {len(list)} {type}: \n{singleLineVals}')
+        print(f'Missing {len(list)} {type}: \n{list}')
 
 def check_hierarchy(gdf, rgdf):
 
@@ -236,17 +256,18 @@ def check_hierarchy(gdf, rgdf):
     uniqueSubDists = justFoci.externalId.astype(str).str.slice(0,6).unique()
     uniqueVills = justFoci.externalId.astype(str).str.slice(0,8).unique()
 
-    # Create an empty list for missing externalIds
+    # Create an empty list for missing externalIds in reveal and overall
+    revealMissing = []
     missing = []
 
     # Check them against what is in Reveal
     for uni in [uniqueProvs, uniqueDists, uniqueSubDists, uniqueVills]:
         for v in uni:
-            if len(rgdf.loc[pd.to_numeric(rgdf.externalId) == pd.to_numeric(v)]) == 0: missing.append(v)
+            if len(rgdf.loc[pd.to_numeric(rgdf.externalId) == pd.to_numeric(v)]) == 0: revealMissing.append(v)
 
     # If not in Reveal, check against itself as well
-    for v in missing:
-        if len(gdf.loc[pd.to_numeric(gdf.externalId) == pd.to_numeric(v)]) > 0: missing.remove(v)
+    for v in revealMissing:
+        if len(gdf.loc[pd.to_numeric(gdf.externalId) == pd.to_numeric(v)]) == 0: missing.append(v)
 
     # Print the number of missing hierarcy members by category and list all the members
     if len(missing) == 0:
