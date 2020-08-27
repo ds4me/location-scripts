@@ -144,7 +144,7 @@ def get_ways_by_ids(api, min_id, max_id, source_filter):
 #
 #     return feats
 
-def clean_for_upload(fc):
+def format_for_upload(fc):
     for feature in fc['features']:
         props = feature['properties']
         id = int(props['description'].strip())
@@ -175,16 +175,16 @@ def main():
     parser = argparse.ArgumentParser(description="Script to create geojson by querying way IDs in local OSM server")
     # parser.add_argument('type', choices=["id","bbox"], help="Type of query - id loops through min/max ids, bbox pulls all values from bbox")
     parser.add_argument('-t', '--type', dest='type', choices=['api','id'], default='api', help='Type of query, defaults to api')
-    parser.add_argument('-o', '--output_file', type=path_with_geojson, default="./bvbdosm.geojson", help="Output file location, must end with '.geojson', defaults to 'bvbdosm.geojson'")
+    parser.add_argument('-o', '--output_file', type=path_with_geojson, default=os.path.join(os.getcwd(),"bvbdosm.geojson"), help="Output file location, must end with '.geojson', defaults to 'bvbdosm.geojson'")
     parser.add_argument('--min', dest="min_id", default="1", help="Minimum way ID to check", type=int)
     parser.add_argument('--max', dest="max_id", default="1000", help="Maximum way ID to check", type=int)
     parser.add_argument('-s', '--source', dest="source_filter", help="Regex string of source values to filter on")
-    parser.add_argument('-c', '--clean_for_upload', action='store_true', help="Change 'description' column to 'externalId', remove line-endings, add 'externalParentId', and add 'geograpicLevel' columns")
+    parser.add_argument('-f', '--format_for_upload', action='store_true', help="Change 'description' column to 'externalId', remove line-endings, add 'externalParentId', and add 'geograpicLevel' columns")
     args = parser.parse_args()
 
     # Read the config.ini file to get the username and password
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)),'config.ini'))
 
     if args.type == 'id':
         # Get api for local OSM instance
@@ -219,8 +219,8 @@ def main():
         print(f'Found {len(fc["features"])} features')
 
         # Clean the feature collection for upload if the flag is present
-        if args.clean_for_upload:
-            fc = clean_for_upload(fc)
+        if args.format_for_upload:
+            fc = format_for_upload(fc)
 
     # Save the feature collection to the output_file location
     with open(args.output_file, 'w', encoding='utf8') as f:
