@@ -9,10 +9,9 @@ import os
 import configparser
 from datetime import datetime
 import csv
-
+from importlib import reload
 
 reload(sys)
-sys.setdefaultencoding('utf-8')
 
 logging.basicConfig(filename='./logs/app.log', filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -508,12 +507,12 @@ def main(argv):
         opts, args = getopt.getopt(argv, "hf:so:t:l:Tjpe:d:m:c:", [
                                    "funct=", "skip_csv", "oname=", "table=", "level=", "testrun", "jurisdiction_only", "put", "external_parent_id=", "depth=", "openmrs_root=", "country="])
     except getopt.GetoptError as e:
-        print 'Use e -h for help'
-        print e
+        print('Use e -h for help')
+        print(e)
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'dsme_location_management.py -f <function>'
+            print('dsme_location_management.py -f <function>')
             sys.exit()
         elif opt in ("-f", "--function"):
             function = arg
@@ -530,12 +529,12 @@ def main(argv):
     logging.info("function: {0}".format(function))
     #all of these functions require a country code to get configuration
     if country == '':
-    	print "Please specify a country and environment e.g. th-st"
+    	print('Please specify a country and environment e.g. th-st')
     	sys.exit()
     else:
     	cnconf = config[country]
 
-	database = '{0}_{1}'.format(config['db']['database'],country.replace('-','_'))
+    database = '{0}_{1}'.format(config['db']['database'],country.replace('-','_'))
     logging.info('database: {0}'.format(database))
     conn = psycopg2.connect(host=config['db']['host'], database=database, user=config['db']['user'], password=config['db']['password'])
 
@@ -546,7 +545,7 @@ def main(argv):
         url_sd = cnconf['url_sd']
         logging.info("create_hierarchy")
         if external_parent_id == '':
-            print "Please specify the externalid of the root location (e.g. the country external id (for thailand this is '0')"
+            print('Please specify the externalid of the root location (e.g. the country external id (for thailand this is "0")')
         else:
             locations_total = total_locations(external_parent_id)
             logging.info('Total locations to add: {0}'.format(locations_total))
@@ -558,7 +557,7 @@ def main(argv):
         jurisdiction_depth = cnconf['jurisdiction_depth']
        # if ou_table == '':
         if country == '':
-            print "Please specify a country and environment e.g. th-st"
+            print('Please specify a country and environment e.g. th-st')
         else:
             load_structures()
     conn.close()

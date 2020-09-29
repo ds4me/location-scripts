@@ -1,5 +1,9 @@
 #!/bin/bash
-ssh ubuntu@13.235.9.43 'bash -s' < get_views_thailand.sh
-scp ubuntu@13.235.9.43:~/*.csv ./toimport/locations
+ssh ubuntu@13.232.78.16 'bash -s' < get_views_thailand.sh
+<<<<<<< HEAD
+scp ubuntu@13.232.78.16:~/*.csv ./toimport/location/th-pr
+=======
+scp ubuntu@13.232.78.16:~/*.csv ./toimport/locations
+>>>>>>> a01245e31211af15ecfc4a357e895adb6646cf78
 
 
