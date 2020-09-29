@@ -320,6 +320,7 @@ def load_files():
     global country
 
     geo_path = './toimport/geojson/{0}'.format(country)
+    logging.info(geo_path)
     location_path = './toimport/location/{0}'.format(country)
     sql_path = '../sql'
     files = []
