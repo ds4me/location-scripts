@@ -356,8 +356,8 @@ def load_files():
     with open('{0}/{1}'.format(sql_path, 'insert_changeset.sql')) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
-       cur.execute(sql)
-       conn.commit()
+        cur.execute(sql)
+        conn.commit()
 
     abspath = os.path.abspath('{0}/jurisdictions.csv'.format(location_path))
     logging.info('   Importing master jurisdiction CSV file from: {0}'.format(abspath))
