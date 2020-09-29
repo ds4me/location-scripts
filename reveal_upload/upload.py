@@ -172,7 +172,7 @@ def post_openmrs_location(parent_id_openmrs, location_name, geographicLevel, ope
     logging.debug('POST OPENMRS: $parentuuid: %s ,$name: %s, $hierarchytag: %s  ',
                   parent_id_openmrs, location_name, openmrs_hierarchy_tag)
     if test_run == False:
-        c = post_request(URL, openmrspost.encode('utf-8'), operation)
+        c = post_request(URL, openmrspost, operation)
         logging.debug(c.text)
 
         if(c.status_code == 400):
@@ -182,7 +182,7 @@ def post_openmrs_location(parent_id_openmrs, location_name, geographicLevel, ope
                 raise ValueError(
                     "SERVER ERROR openMRS id cannot be found for that name")
         elif(c.status_code == 500):
-            logging.info('ERROR: ' + openmrspost.encode('utf-8'))
+            logging.info('ERROR: ' + openmrspost)
 
             raise ValueError("SERVER ERROR " + c.text)
         else:  # post request suceeded
