@@ -163,10 +163,10 @@ def post_openmrs_location(parent_id_openmrs, location_name, geographicLevel, ope
     openmrspost = json.dumps(
         openmrstemplate, ensure_ascii=False).encode('utf8')
     # for DSME we assume the parent is already created in OpenMRS (e.g. Thailand, which does not exist in Reveal i.e. no level 0 in Reveal)
-    openmrspost = openmrspost.replace('$parentuuid', parent_id_openmrs)
-    openmrspost = openmrspost.replace('$name', location_name)
+    openmrspost = openmrspost.replace('$parentuuid'.encode('utf8'), parent_id_openmrs.encode('utf8'))
+    openmrspost = openmrspost.replace('$name'.encode('utf8'), location_name.encode('utf8'))
     openmrspost = openmrspost.replace(
-        '$hierarchytag', cnconf[str(geographicLevel)])
+        '$hierarchytag'.encode('utf8'), cnconf[str(geographicLevel)].encode('utf8'))
 
     logging.debug(openmrspost)
     logging.debug('POST OPENMRS: $parentuuid: %s ,$name: %s, $hierarchytag: %s  ',
