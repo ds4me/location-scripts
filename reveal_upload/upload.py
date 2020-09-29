@@ -70,6 +70,11 @@ url_post_reveal_structure_batch = "https://{0}.smartregister.org/opensrp/rest/lo
 
 config.read('./config/config.ini')
 
+def xstr(s):
+    if s is None:
+        return ''
+    return str(s)
+
 def get_request(URL):
     auth = eval(cnconf['openmrs_auth']) if 'openmrs' in URL else eval(
         cnconf['reveal_auth'])
@@ -94,15 +99,15 @@ def post_reveal_location(id_opensrp, coordinates, id_parent_opensrp, location_na
     revealpost = json.dumps(revealtemplate)
 
     URL = url_post_reveal_jurisdiction.format(url_sd)
-    revealpost = revealpost.replace('$name', location_name)
-    revealpost = revealpost.replace('$nam_en', location_name_en)
-    revealpost = revealpost.replace('$id_openmrs', str(id_openmrs))
-    revealpost = revealpost.replace('$id_opensrp', str(id_opensrp))
-    revealpost = revealpost.replace('1111111111', str(coordinates))
-    revealpost = revealpost.replace('$id_parent_opensrp', str(id_parent_opensrp))
-    revealpost = revealpost.replace('2222222222', str(geographicLevel))
+    revealpost = revealpost.replace('$name', xstr(location_name))
+    revealpost = revealpost.replace('$nam_en', xstr(location_name_en))
+    revealpost = revealpost.replace('$id_openmrs', xstr(id_openmrs))
+    revealpost = revealpost.replace('$id_opensrp', xstr(id_opensrp))
+    revealpost = revealpost.replace('1111111111', xstr(coordinates))
+    revealpost = revealpost.replace('$id_parent_opensrp', xstr(id_parent_opensrp))
+    revealpost = revealpost.replace('2222222222', xstr(geographicLevel))
     revealpost = revealpost.replace('$id_external', id_external)
-    revealpost = revealpost.replace('$type', str(geometry_type))
+    revealpost = revealpost.replace('$type', xstr(geometry_type))
     # todo: clean up string replacement above
     logging.debug('POST REVEAL URL: ' + URL)
     logging.debug('POST REVEAL BODY: ' + revealpost)
