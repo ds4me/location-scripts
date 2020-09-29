@@ -331,8 +331,8 @@ def load_files():
     cur = conn.cursor()
     logging.info('   Truncating database tables')
     sql = ("truncate table geojson_file; truncate table changeset; truncate table mergeset; truncate table jurisdiction_master; truncate table structure_master;")
-    #cur.execute(sql)
-    #conn.commit()
+    cur.execute(sql)
+    conn.commit()
     logging.info('   Loading geoJSON files @ {0}'.format(geo_path))
     for r, d, f in os.walk(geo_path):
         for file in f:
