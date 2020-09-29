@@ -346,8 +346,8 @@ def load_files():
                     if data != '':
                         geo = json.dumps(data).replace("'", "")
                         sql = ("insert into geojson_file (file, file_name) values ('{0}', '{1}');").format(geo, file)
-                        #cur.execute(sql)
-                        #conn.commit()
+                        cur.execute(sql)
+                        conn.commit()
                     else:
                         logging.info("no data")
 
