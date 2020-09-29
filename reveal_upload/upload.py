@@ -310,7 +310,7 @@ def load_jurisdictions(id_parent_external, id_parent_opensrp='', id_parent_openm
             openMRS_id = location['id_openmrs']
 
         logging.debug("depth: " + str(jurisdiction_depth))
-        if int(location['geographic_level']) < jurisdiction_depth:
+        if int(location['geographic_level']) < int(jurisdiction_depth):
             load_jurisdictions(
                 location['id_external'], location['id_opensrp'], openMRS_id)
         # add to openSRP
