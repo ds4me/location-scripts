@@ -17,7 +17,13 @@ CREATE TABLE mergeset
     coordinates character varying ,
     operation character(1) ,
     processed_date timestamp without time zone,
-    processed boolean
+    processed boolean,
+    d_name boolean,
+    d_type boolean,
+    d_tstatus boolean,
+    d_tgeographicLevel boolean,
+    d_texternalparentid boolean,
+    d_tcoordinates boolean
 );
 
 DROP TABLE IF EXISTS jurisdiction_master;
@@ -64,7 +70,8 @@ CREATE TABLE structure_master
     geographiclevel integer,
     openmrs_id character varying ,
     type character varying ,
-    coordinates character varying
+    coordinates character varying,
+    externalparentid character varying 
 );
 
 
