@@ -32,8 +32,10 @@ from structure_master ;
 
 -- insert into mergeset with new records from changeset
 insert into mergeset (externalid,externalparentid,status, name, name_en, geographicLevel, type, coordinates , operation)
-select 	externalId ,	externalParentId ,	status ,	name ,	name_en ,	geographicLevel ,	type ,	coordinates, 'i'
-from changeset where externalid not in (select externalid from jurisdiction_master);
+select 		c.externalId ,	c.externalParentId ,	c.status ,	c.name ,	c.name_en ,	c.geographicLevel ,	c.type ,	c.coordinates, 'i'
+from 		changeset c 
+left join 	jurisdiction_master j on j. externalid = c.externalid 
+where 		j.externalid is null;
 
 -- update mergeset with changeset changes
 update mergeset m
@@ -46,7 +48,7 @@ update 		mergeset  set operation = 'x'
 from 		jurisdiction_master ml
 where 		ml.externalid = mergeset.externalid
 and 		ml.externalparentid <>  mergeset.externalparentid
-and 		mergeset.operation is not null;
+and 		mergeset.operation is not null;	
 
 
 
