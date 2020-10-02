@@ -393,7 +393,7 @@ def load_files():
         conn.commit()
 
     id_sql = ''
-    if cnconf['different_external_ids'] == 1:
+    if cnconf['different_external_ids'] == '1':
         id_sql = 'generate_opensrp_ids.sql'
     else:
          id_sql = 'set_opensrp_ids_from_external.sql'
@@ -404,7 +404,7 @@ def load_files():
         cur.execute(sql)
         conn.commit()
 
-    if cnconf['add_name_suffix'] == 1:
+    if cnconf['add_name_suffix'] == '1':
         logging.info('   Running SQL: {0}'.format('add_suffix.sql'))
         with open('{0}/{1}'.format(sql_path, 'add_suffix.sql')) as sql_file:
             sql = sql_file.read()
