@@ -199,7 +199,7 @@ def post_openmrs_location(parent_id_openmrs, location_name, geographicLevel, ope
 
 def total_locations(id_parent_external):
     #sql = 'SELECT count(*)  from '+ ou_table  + ' where issue = false and externalParentId =' + "'" + id_parent_external + "'"
-    sql = 'SELECT count(*)  from mergeset where operation is not null and processed is null'
+    sql = "SELECT count(*) from mergeset where operation is not null and operation != 'x' and processed is null"
     cur = conn.cursor()
     cur.execute(sql)
     counts = cur.fetchall()
