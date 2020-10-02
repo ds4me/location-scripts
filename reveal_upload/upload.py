@@ -409,7 +409,7 @@ def load_files():
         with open('{0}/{1}'.format(sql_path, 'add_suffix.sql')) as sql_file:
             sql = sql_file.read()
             logging.debug(sql)
-            #ur.execute(sql)
+            cur.execute(sql)
             conn.commit()
 
     logging.info('Completed load_files successfully')
