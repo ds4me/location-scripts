@@ -113,7 +113,7 @@ def post_reveal_location(id_opensrp, coordinates, id_parent_opensrp, location_na
     logging.debug('POST REVEAL BODY: ' + revealpost)
 
     if test_run == False:
-        response = post_request(URL, revealpost, operation)
+        response = post_request(URL, revealpost.encode('utf-8'), operation)
         logging.info(response.text)
     else:
         logging.debug("Skipping Reveal post - test run")
