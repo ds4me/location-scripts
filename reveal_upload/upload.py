@@ -201,7 +201,7 @@ def post_openmrs_location(parent_id_openmrs, location_name, geographicLevel, ope
 
 def total_locations(id_parent_external):
     #sql = 'SELECT count(*)  from '+ ou_table  + ' where issue = false and externalParentId =' + "'" + id_parent_external + "'"
-    sql = 'SELECT count(*)  from mergeset where operation is not null and processed is null'
+    sql = "SELECT count(*) from mergeset where operation is not null and operation != 'x' and processed is null"
     cur = conn.cursor()
     cur.execute(sql)
     counts = cur.fetchall()
@@ -395,7 +395,7 @@ def load_files():
         conn.commit()
 
     id_sql = ''
-    if cnconf['different_external_ids'] == 1:
+    if cnconf['different_external_ids'] == '1':
         id_sql = 'generate_opensrp_ids.sql'
     else:
          id_sql = 'set_opensrp_ids_from_external.sql'
@@ -406,12 +406,12 @@ def load_files():
         cur.execute(sql)
         conn.commit()
 
-    if cnconf['add_name_suffix'] == 1:
+    if cnconf['add_name_suffix'] == '1':
         logging.info('   Running SQL: {0}'.format('add_suffix.sql'))
         with open('{0}/{1}'.format(sql_path, 'add_suffix.sql')) as sql_file:
             sql = sql_file.read()
             logging.debug(sql)
-            #ur.execute(sql)
+            cur.execute(sql)
             conn.commit()
 
     logging.info('Completed load_files successfully')
