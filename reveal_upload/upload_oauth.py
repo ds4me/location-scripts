@@ -357,42 +357,44 @@ def load_files():
                         conn.commit()
                     else:
                         logging.info("no data")
+    logging.info('   Loading geoJSON files @ {0}'.format(location_path))
+    for r, d, f in os.walk(location_path):
+        for file in f:
+            if not file.startswith('.'):
+                logging.info('   Loading geoJSON file: {0}'.format(file))
+                with open('{0}/{1}'.format(location_path, file)) as json_file:
+                    try:
+                        data = json.load(json_file)
+                    except ValueError:
+                        logging.info("value error")
+                    if data != '':
+                        geo = json.dumps(data).replace("'", "")
+                        sql = ("insert into location_file (file, file_name) values ('{0}', '{1}');").format(geo, file)
+                        cur.execute(sql)
+                        conn.commit()
+                    else:
+                        logging.info("no data")
 
 
     logging.info('   Running SQL: {0}'.format('insert_changeset.sql'))
     with open('{0}/{1}'.format(sql_path, 'insert_changeset.sql')) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
-        cur.execute(sql)
-        conn.commit()
+        #cur.execute(sql)
+        #conn.commit()
 
     abspath = os.path.abspath('{0}/jurisdictions.csv'.format(location_path))
     logging.info('   Importing master jurisdiction CSV file from: {0}'.format(abspath))
     
-    if skip_csv == 0:
-        copy_sql = "COPY jurisdiction_master (id,externalid,parentid,status,name,geographiclevel,openmrs_id,type,coordinates) FROM STDIN DELIMITER '|' CSV HEADER;"
-        cur.copy_expert(sql=copy_sql, file=open(abspath,"r"))
-        conn.commit()
-    else:
-        logging.info('  Skipping jurisdiction csv upload')
-
-    abspath = os.path.abspath('{0}/structure.csv'.format(location_path))
-    logging.info('   Importing master CSV structure file from: {0}'.format(abspath))
-    
-    if skip_csv == 0:
-        copy_sql = "COPY structure_master (id,externalid,parentid,status,name,geographiclevel,openmrs_id,type,coordinates) FROM STDIN DELIMITER '|' CSV HEADER;"
-        cur.copy_expert(sql=copy_sql, file=open(abspath,"r"))
-        conn.commit()
-    else:
-        logging.info('  Skipping structure csv upload')
+   
 
 
     logging.info('   Running SQL: {0}'.format('run_merge.sql'))
     with open('{0}/{1}'.format(sql_path, 'run_merge.sql')) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
-        cur.execute(sql)
-        conn.commit()
+        #cur.execute(sql)
+        #conn.commit()
 
     id_sql = ''
     if cnconf['different_external_ids'] == 1:
@@ -403,8 +405,8 @@ def load_files():
     with open('{0}/{1}'.format(sql_path, id_sql)) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
-        cur.execute(sql)
-        conn.commit()
+        #cur.execute(sql)
+        #conn.commit()
 
     if cnconf['add_name_suffix'] == 1:
         logging.info('   Running SQL: {0}'.format('add_suffix.sql'))
@@ -412,7 +414,7 @@ def load_files():
             sql = sql_file.read()
             logging.debug(sql)
             #ur.execute(sql)
-            conn.commit()
+            #conn.commit()
 
     logging.info('Completed load_files successfully')
 
