@@ -11,6 +11,10 @@ from datetime import datetime
 import csv
 from importlib import reload
 from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2 import BackendApplicationClient
+from oauthlib.oauth2 import LegacyApplicationClient
+from requests_oauth2 import OAuth2BearerToken
+from traceback import format_exc
 reload(sys)
 
 logging.basicConfig(filename='./logs/app.log', filemode='a',
@@ -337,7 +341,7 @@ def load_files():
     logging.info('Importing files:')
     cur = conn.cursor()
     logging.info('   Truncating database tables')
-    sql = ("truncate table geojson_file; truncate table changeset; truncate table mergeset; truncate table jurisdiction_master; truncate table structure_master;")
+    sql = ("truncate table geojson_file; truncate table location_file; truncate table changeset; truncate table mergeset; truncate table jurisdiction_master; truncate table structure_master;")
     cur.execute(sql)
     conn.commit()
     logging.info('   Loading geoJSON files @ {0}'.format(geo_path))
@@ -357,11 +361,11 @@ def load_files():
                         conn.commit()
                     else:
                         logging.info("no data")
-    logging.info('   Loading geoJSON files @ {0}'.format(location_path))
+    logging.info('   Loading location files @ {0}'.format(location_path))
     for r, d, f in os.walk(location_path):
         for file in f:
             if not file.startswith('.'):
-                logging.info('   Loading geoJSON file: {0}'.format(file))
+                logging.info('   Loading location file: {0}'.format(file))
                 with open('{0}/{1}'.format(location_path, file)) as json_file:
                     try:
                         data = json.load(json_file)
@@ -376,43 +380,43 @@ def load_files():
                         logging.info("no data")
 
 
-    logging.info('   Running SQL: {0}'.format('insert_changeset.sql'))
-    with open('{0}/{1}'.format(sql_path, 'insert_changeset.sql')) as sql_file:
-        sql = sql_file.read()
-        logging.debug(sql)
+    #logging.info('   Running SQL: {0}'.format('insert_changeset.sql'))
+    #with open('{0}/{1}'.format(sql_path, 'insert_changeset.sql')) as sql_file:
+     #   sql = sql_file.read()
+      #  logging.debug(sql)
         #cur.execute(sql)
         #conn.commit()
 
-    abspath = os.path.abspath('{0}/jurisdictions.csv'.format(location_path))
-    logging.info('   Importing master jurisdiction CSV file from: {0}'.format(abspath))
+   # abspath = os.path.abspath('{0}/jurisdictions.csv'.format(location_path))
+    #logging.info('   Importing master jurisdiction CSV file from: {0}'.format(abspath))
     
    
 
 
-    logging.info('   Running SQL: {0}'.format('run_merge.sql'))
-    with open('{0}/{1}'.format(sql_path, 'run_merge.sql')) as sql_file:
-        sql = sql_file.read()
-        logging.debug(sql)
+   # logging.info('   Running SQL: {0}'.format('run_merge.sql'))
+    #with open('{0}/{1}'.format(sql_path, 'run_merge.sql')) as sql_file:
+       # sql = sql_file.read()
+       # logging.debug(sql)
         #cur.execute(sql)
         #conn.commit()
 
-    id_sql = ''
-    if cnconf['different_external_ids'] == 1:
-        id_sql = 'generate_opensrp_ids.sql'
-    else:
-         id_sql = 'set_opensrp_ids_from_external.sql'
-    logging.info('   Running SQL: {0}'.format(id_sql))
-    with open('{0}/{1}'.format(sql_path, id_sql)) as sql_file:
-        sql = sql_file.read()
-        logging.debug(sql)
+    #id_sql = ''
+    #if cnconf['different_external_ids'] == 1:
+    #    id_sql = 'generate_opensrp_ids.sql'
+    #else:
+    #     id_sql = 'set_opensrp_ids_from_external.sql'
+    #logging.info('   Running SQL: {0}'.format(id_sql))
+    #with open('{0}/{1}'.format(sql_path, id_sql)) as sql_file:
+    #    sql = sql_file.read()
+    #    logging.debug(sql)
         #cur.execute(sql)
         #conn.commit()
 
-    if cnconf['add_name_suffix'] == 1:
-        logging.info('   Running SQL: {0}'.format('add_suffix.sql'))
-        with open('{0}/{1}'.format(sql_path, 'add_suffix.sql')) as sql_file:
-            sql = sql_file.read()
-            logging.debug(sql)
+    #if cnconf['add_name_suffix'] == 1:
+     #   logging.info('   Running SQL: {0}'.format('add_suffix.sql'))
+     #   with open('{0}/{1}'.format(sql_path, 'add_suffix.sql')) as sql_file:
+     #       sql = sql_file.read()
+     #       logging.debug(sql)
             #ur.execute(sql)
             #conn.commit()
 
@@ -496,16 +500,91 @@ def test_oauth():
     client_id = cnconf['client_id']
     client_secret = cnconf['client_secret']
     username = cnconf['username']
-    passwrdr = cnconf['passwrod']
+    password = cnconf['password']
     token_url = cnconf['token_url']
     redirect_uri =''
     authorization_response = ''
     scope = ''
-    oauth = OAuth2Session(client_id, redirect_uri=redirect_uri,scope=scope)
-    token = oauth.fetch_token(token_url, authorization_response=authorization_response, client_secret=client_secret)
-    URL = url_get_reveal_jurisdictions.format(url_sd, '0')
-    r = oauth.get(URL)
+    access_token = None
+    print(client_id)
+    print(client_secret)
+    print(token_url)
+    oauth = OAuth2Session(client=LegacyApplicationClient(client_id=client_id))
+    token = oauth.fetch_token(token_url=token_url,
+        username=username, password=password, client_id=client_id,
+        client_secret=client_secret)
+    r = oauth.get('https://reveal-th-preview.smartregister.org/opensrp/rest/plans/e167b3e1-1991-487b-abc7-2e880c3df564')
+    print(r.text)
+    mrs = json.loads(r.text)
+
+    txt = json.dumps(mrs[0]) 
+    #.encode('utf-8')
+    print(txt)
+    headers = {'content-type':'application/json'}
+    r = oauth.put('https://reveal-th-preview.smartregister.org/opensrp/rest/plans', data=txt, headers = headers)
+    #r = oauth.post('https://reveal-th-preview.smartregister.org/opensrp/rest/plans', data=mrs)
     print(r)
+    
+
+
+
+def add_locations_local_preview():
+    local_conf = config['th-pl']
+    preview_conf = config['th-pv']
+    local_oauth = OAuth2Session(client=LegacyApplicationClient(client_id=local_conf['client_id']))
+    preview_oauth = OAuth2Session(client=LegacyApplicationClient(client_id=preview_conf['client_id']))
+    local_token = local_oauth.fetch_token(token_url=local_conf['token_url'], username=local_conf['username'], password=local_conf['password'], client_id=local_conf['client_id'], client_secret=local_conf['client_secret'])
+    preview_token = preview_oauth.fetch_token(token_url=preview_conf['token_url'], username=preview_conf['username'], password=preview_conf['password'], client_id=preview_conf['client_id'], client_secret=preview_conf['client_secret'])
+    
+    #local_jurisdictions = local_oauth.get('https://servermhealth.ddc.moph.go.th/opensrp/rest/location/findByProperties?is_jurisdiction=true&return_geometry=true&properties_filter=geographicLevel:4,status:Active')
+    local_jurisdictions = local_oauth.get('https://servermhealth.ddc.moph.go.th/opensrp/rest/location/getAll?is_jurisdiction=true&serverVersion=0&limit=50000&return_geometry=true')
+    
+    local_js = json.loads(local_jurisdictions.text)
+    #preview_jurisdictions = preview_oauth.get('https://reveal-th-preview.smartregister.org/opensrp/rest/location/findByProperties?is_jurisdiction=true&return_geometry=true&properties_filter=geographicLevel:4,status:Active')
+    preview_jurisdictions = preview_oauth.get('https://reveal-th-preview.smartregister.org/opensrp/rest/location/getAll?is_jurisdiction=true&serverVersion=0&limit=50000&return_geometry=true')
+    preview_js = json.loads(preview_jurisdictions.text)
+    print(len(local_js))
+    print(len(preview_js))
+    for ll in local_js:
+        print(ll['properties']['name'])
+        loc_exists = location_exists(preview_js, ll['id'])
+        if loc_exists == False:
+            txt = json.dumps(ll) 
+            #.encode('utf-8')
+           # print(txt)
+            headers = {'content-type':'application/json'}
+            r = preview_oauth.post('https://reveal-th-preview.smartregister.org/opensrp/rest/location/?is_jurisdiction=true', data=txt, headers = headers)
+    print(len(local_js))
+    print(len(preview_js))
+    #https://reveal-th-preview.smartregister.org/opensrp/rest/location/findByProperties?is_jurisdiction=true&return_geometry=true&properties_filter=geographicLevel:1,status:Active
+
+def location_exists(arr, id):
+    exists = False;
+    for l in arr:
+        if l['id']==id:
+            exists = True
+            break
+    return exists
+
+
+def ensure(var, name):
+    if var == None:
+        sys.stderr.write('error: {} not found\n'.format(name))
+        sys.exit(1)
+    return var
+
+def get_oauth2_session(client_id, client_secret, access_token):
+    if access_token == None:
+        token_url = cnconf['token_url']
+        session = OAuth2Session(client = BackendApplicationClient(client_id = client_id))
+        ensure(client_secret, 'client secret')
+        try:
+            session.fetch_token(token_url = token_url, client_id = client_id, client_secret = client_secret)
+        except:
+            raise Exception('failed to get access token: {}'.format(format_exc()))
+    else:
+        session = OAuth2Session(token = { 'access_token': access_token })
+    return session
 
 def main(argv):
     logging.info("start")
@@ -553,6 +632,9 @@ def main(argv):
             skip_csv = 1
     logging.info("function: {0}".format(function))
     #all of these functions require a country code to get configuration
+    if function == 'locations':
+        add_locations_local_preview()
+        return
     if country == '':
     	print('Please specify a country and environment e.g. th-st')
     	sys.exit()
