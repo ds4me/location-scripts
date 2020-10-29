@@ -15,10 +15,12 @@ from oauthlib.oauth2 import BackendApplicationClient
 from oauthlib.oauth2 import LegacyApplicationClient
 from requests_oauth2 import OAuth2BearerToken
 from traceback import format_exc
+import uuid
+
 reload(sys)
 
 logging.basicConfig(filename='./logs/app.log', filemode='a',
-                    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+                    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 config = configparser.ConfigParser()
@@ -146,62 +148,6 @@ def update_database(opensrp_uuid):
         logging.debug(sql)
         cur.execute(sql)
         conn.commit()
-
-def check_existing_openmrs_location(openmrs_name):
-    # get locations by name
-    openmrs_attributes = {}
-    URL = url_get_openmrs_locations_name.format(url_sd, openmrs_name)
-    c = get_request(URL)
-    if(c.status_code == 200):
-        logging.debug("SUCCESS locations by name")
-    geo = json.loads(c.text)
-    logging.debug(c.text)
-    uuid = ''
-    for l in geo["results"]:
-        if(l["display"].lower() == openmrs_name.lower()):
-            uuid = l["uuid"]
-            logging.debug('Found uuid {0}'.format(uuid))
-            break
-        else:
-            logging.debug('Did not find uuid')
-    return uuid
-
-def post_openmrs_location(parent_id_openmrs, location_name, geographicLevel, operation):
-    openmrs_hierarchy_tag = cnconf[str(geographicLevel)]
-    logging.info("Attempting to create openMRS location: ")
-    id_openmrs = ''
-    URL = url_post_openmrs_location.format(url_sd)
-    openmrspost = json.dumps(
-        openmrstemplate, ensure_ascii=False).encode('utf8')
-    # for DSME we assume the parent is already created in OpenMRS (e.g. Thailand, which does not exist in Reveal i.e. no level 0 in Reveal)
-    openmrspost = openmrspost.replace('$parentuuid'.encode('utf8'), parent_id_openmrs.encode('utf8'))
-    openmrspost = openmrspost.replace('$name'.encode('utf8'), location_name.encode('utf8'))
-    openmrspost = openmrspost.replace(
-        '$hierarchytag'.encode('utf8'), cnconf[str(geographicLevel)].encode('utf8'))
-
-    logging.debug(openmrspost)
-    logging.debug('POST OPENMRS: $parentuuid: %s ,$name: %s, $hierarchytag: %s  ',
-                  parent_id_openmrs, location_name, openmrs_hierarchy_tag)
-    if test_run == False:
-        c = post_request(URL, openmrspost, operation)
-        logging.debug(c.text)
-
-        if(c.status_code == 400):
-            logging.info("OpenMRS name exists: " + location_name)
-            id_openmrs = check_existing_openmrs_location(location_name)
-            if id_openmrs == '':
-                raise ValueError(
-                    "SERVER ERROR openMRS id cannot be found for that name")
-        elif(c.status_code == 500):
-            logging.info('ERROR: ' + openmrspost)
-
-            raise ValueError("SERVER ERROR " + c.text)
-        else:  # post request suceeded
-            mrs = json.loads(c.text)
-            id_openmrs = mrs["uuid"]
-    else:
-        id_openmrs = 'test_uuid'
-    return id_openmrs
 
 def total_locations(id_parent_external):
     #sql = 'SELECT count(*)  from '+ ou_table  + ' where issue = false and externalParentId =' + "'" + id_parent_external + "'"
@@ -422,7 +368,6 @@ def load_files():
 
     logging.info('Completed load_files successfully')
 
-
 def total_structures(geographic_level):
     sql = "SELECT count(*)  from mergeset  \
         where operation = 'i' and geographicLevel = " + str(geographic_level)
@@ -524,9 +469,6 @@ def test_oauth():
     r = oauth.put('https://reveal-th-preview.smartregister.org/opensrp/rest/plans', data=txt, headers = headers)
     #r = oauth.post('https://reveal-th-preview.smartregister.org/opensrp/rest/plans', data=mrs)
     print(r)
-    
-
-
 
 def add_locations_local_preview():
     local_conf = config['th-pl']
@@ -558,6 +500,89 @@ def add_locations_local_preview():
     print(len(preview_js))
     #https://reveal-th-preview.smartregister.org/opensrp/rest/location/findByProperties?is_jurisdiction=true&return_geometry=true&properties_filter=geographicLevel:1,status:Active
 
+def post_user(team_id, user_id, user_name, userrole_id):
+    local_conf = config['th-pl']
+    local_oauth = OAuth2Session(client=LegacyApplicationClient(client_id=local_conf['client_id']))
+    local_token = local_oauth.fetch_token(token_url=local_conf['token_url'], username=local_conf['username'], password=local_conf['password'], client_id=local_conf['client_id'], client_secret=local_conf['client_secret'])
+    headers = {'content-type':'application/json'}
+
+    #add user to Keycloak
+
+    #get userid from Keycloak
+
+    #set user password in Keycloak
+
+    #join Provider group in keycloak
+
+    #link roles in Keycloak 
+
+    #add user to OpenSRP
+    user = {}
+    user["identifier"] = user_id #THIS NOW COMES FROM KEYCLOAK ABOVE 
+    user["active"] = True
+    user["userId"] = user_id  #THIS NOW COMES FROM KEYCLOAK ABOVE (same as idenifier)
+    user["name"] = user_name
+    user["username"] = user_name
+    txt = json.dumps(user) 
+    print(txt)
+    headers = {'content-type':'application/json'}
+    r = local_oauth.post('https://servermhealth.ddc.moph.go.th/opensrp/rest/practitioner', data=txt, headers = headers)
+    print(r)
+
+    #add practitioner role to OpenSRP (linking the user/practitioner to the team/organization)
+    role = {}
+    role['code'] = {"text": "Community Health Worker"}
+    role['identifier'] = userrole_id #needs to be created in python eg 
+    role['active'] = True
+    role['organization'] = team_id
+    role['practitioner'] = user_id
+    txt = json.dumps(role) 
+    print(role)
+    headers = {'content-type':'application/json'}
+    r = local_oauth.post('https://servermhealth.ddc.moph.go.th/opensrp/rest/practitionerRole', data=txt, headers = headers)
+    print(r)
+
+def post_team(team_id, team_name):
+    local_conf = config['th-pl']
+    local_oauth = OAuth2Session(client=LegacyApplicationClient(client_id=local_conf['client_id']))
+    local_token = local_oauth.fetch_token(token_url=local_conf['token_url'], username=local_conf['username'], password=local_conf['password'], client_id=local_conf['client_id'], client_secret=local_conf['client_secret'])
+    
+    team = {}
+    team['identifier'] = team_id
+    team['active'] = True
+    team['name'] = team_name
+    team['type'] = {"coding": [{"system":"http://terminology.hl7.org/CodeSystem/organization-type","code": "team","display": "Team"}]}
+    
+    txt = json.dumps(team) 
+    print(txt)
+    headers = {'content-type':'application/json'}
+    r = local_oauth.post('https://servermhealth.ddc.moph.go.th/opensrp/rest/organization', data=txt, headers = headers)
+    print(r)
+
+def setup_users():
+    counter = 0
+    # with open('teams.csv') as ff:
+    #     for line in ff:
+    #         if counter % 10 == 0:
+    #             logging.info("{0}".format(counter))
+    #         counter+=1
+    #         #team_name,team_id,user_name,user_id,practitionerrole_id
+    #         i=line.rstrip().split(',')
+    #         post_team(i[1],i[0])
+    
+    with open('users.csv') as f:
+        for line in f:
+            if counter % 10 == 0:
+                logging.info("{0}".format(counter))
+            counter+=1
+            #team_id, user_id, user_name, userrole_id
+            print(line)
+            i=line.rstrip().split(',')
+            post_user(i[0],i[1],i[2],i[3])
+            logging.debug(line.split('\r\n')[0])
+
+
+
 def location_exists(arr, id):
     exists = False;
     for l in arr:
@@ -565,7 +590,6 @@ def location_exists(arr, id):
             exists = True
             break
     return exists
-
 
 def ensure(var, name):
     if var == None:
@@ -661,6 +685,8 @@ def main(argv):
         load_files()
     elif function == 'oauth':
         test_oauth()
+    elif function == 'setup_users':
+        setup_users()
     elif function == 'load_structures':
         url_sd = cnconf['url_sd']
         jurisdiction_depth = cnconf['jurisdiction_depth']
