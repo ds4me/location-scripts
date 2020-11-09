@@ -12,6 +12,10 @@ import json
 import geojson
 import numpy as np
 
+import requests
+from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2 import LegacyApplicationClient
+
 # def check_nulls_and_line_endings(gdf, colName):
 #     # Get a list of null values for the column
 #     nulls = gdf.loc[gdf[colName].isnull()]
@@ -172,7 +176,7 @@ def download_reveal_jurisdictions():
     scp = SCPClient(ssh.get_transport(), progress=progress)
 
     # Get the jurisdictions.csv and print a new line
-    scp.get('/root/location-scripts/reveal_upload/toimport/locations/jurisdictions.csv')
+    scp.get('/root/location-scripts/reveal_upload/toimport/location/th-pr/jurisdictions.csv', jurisdictionFile)
     print(' ')
 
     # Close both the scp and ssh connections
@@ -183,6 +187,33 @@ def download_reveal_jurisdictions():
     return jurisdictionFile
 
 
+
+
+
+
+def get_oauth_token():
+    token_url = 'https://keycloakmhealth.ddc.moph.go.th/auth/realms/reveal-thailand-production/protocol/openid-connect/token'
+    username = 'nifi-user'
+    password = '2dm647ahCWpb7aZ29DZeATWDa'
+    client_id = 'reveal-thailand-production'
+    client_secret = 'e076fd42-a301-43c5-a465-7c855bf2e9eb'
+    oauth = OAuth2Session(client=LegacyApplicationClient(client_id=client_id))
+    return oauth.fetch_token(token_url=token_url,username=username, password=password,client_id=client_id, client_secret=client_secret)
+
+def api_get_request(url, token):
+    headers = {"Authorization": "Bearer {}".format(token['access_token'])}
+    r = requests.get(url, headers=headers)
+    return r.json()
+
+
+def get_locations_from_api():
+    token = get_oauth_token()
+    url = 'https://servermhealth.ddc.moph.go.th/opensrp/rest/location/getAll?is_jurisdiction=true&serverVersion=0&limit=50000&return_geometry=true'
+    res = api_get_request(url, token)
+
+
+
+
 def get_reveal_gdf(jurisdictionFile):
 
     if not jurisdictionFile:
@@ -191,21 +222,45 @@ def get_reveal_gdf(jurisdictionFile):
     # Convert CSV coodinates to GeoJSON polygons
     def get_polygon(row):
         feat = geojson.Feature(geometry={
-                "type": "Polygon",
-                "coordinates": json.loads(row.coordinates)})
+                # "type": "Polygon",
+                "type": row['geometry.type'],
+                "coordinates": row['geometry.coordinates']})
+                # "coordinates": json.loads(row.coordinates)})
         return shapely.geometry.Polygon(list(geojson.utils.coords(feat)))
 
+
+    # revealCSV = get_locations_from_api()
+    # feats = []
+    # for f in revealCSV:
+    #     feats.append(geojson.Feature(f))
+    # coll = geojson.FeatureCollection(feats)
+    # print(coll)
+
+    # j = pd.read_json(jurisdictionFile)
+    with open(jurisdictionFile, encoding='utf8') as f:
+        data = json.load(f)
+    j = pd.json_normalize(data)
+    # j.to_excel("C:/users/efilip/desktop/testing.xlsx")
+    geom = j.apply(lambda row: get_polygon(row), axis=1)
+
+    # j.to_excel('C:/users/efilip/desktop/testing.xlsx')
+
+
+
     # Load the CSV file
-    revealCSV = pd.read_csv(jurisdictionFile, delimiter='|')
+    # revealCSV = pd.read_csv(jurisdictionFile, delimiter='|')
 
     # Create the geom
-    geom = revealCSV.apply(lambda row: get_polygon(row),axis=1)
+    # geom = revealCSV.apply(lambda row: get_polygon(row),axis=1)
 
     # Create the GeoDataFrame
-    rgdf = gpd.GeoDataFrame(revealCSV, crs="EPSG:4326", geometry=geom)
+    # rgdf = gpd.GeoDataFrame(revealCSV, crs="EPSG:4326", geometry=geom)
+    rgdf = gpd.GeoDataFrame(j, crs="EPSG:4326", geometry=geom)
+    rgdf.to_excel('C:/Users/efilip/desktop/testing.xlsx')
 
     # rename the columns
-    rgdf = rgdf.rename({'externalid': 'externalId', 'parentid': 'parentId', 'geographiclevel': 'geographicLevel'}, axis=1)
+    # rgdf = rgdf.rename({'externalid': 'externalId', 'parentid': 'parentId', 'geographiclevel': 'geographicLevel'}, axis=1)
+    rgdf = rgdf.rename({'properties.externalId': 'externalId', 'properties.parentId': 'parentId', 'properties.geographicLevel': 'geographicLevel'}, axis=1)
 
     # Remove those without an externalId
     rgdf = rgdf.dropna(subset=['externalId'])
@@ -349,10 +404,11 @@ def valid_geojson(gjson):
 
 def valid_csv(csv):
     if os.path.isfile(csv):
-        if csv.endswith('.csv'):
-            return csv
-        else:
-            raise argparse.ArgumentTypeError(f'File must end with .csv')
+        return csv
+        # if csv.endswith('.csv'):
+        #     return csv
+        # else:
+            # raise argparse.ArgumentTypeError(f'File must end with .csv')
     else:
         raise argparse.ArgumentTypeError(f'{csv} is not a valid file')
 
