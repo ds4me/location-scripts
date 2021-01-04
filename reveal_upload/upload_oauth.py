@@ -500,7 +500,7 @@ def add_locations_local_preview():
     print(len(preview_js))
     #https://reveal-th-preview.smartregister.org/opensrp/rest/location/findByProperties?is_jurisdiction=true&return_geometry=true&properties_filter=geographicLevel:1,status:Active
 
-def post_user(team_id, user_id, user_name, userrole_id):
+def post_user(team_id, user_id, user_name):
     local_conf = config['th-pl']
     local_oauth = OAuth2Session(client=LegacyApplicationClient(client_id=local_conf['client_id']))
     local_token = local_oauth.fetch_token(token_url=local_conf['token_url'], username=local_conf['username'], password=local_conf['password'], client_id=local_conf['client_id'], client_secret=local_conf['client_secret'])
@@ -532,7 +532,7 @@ def post_user(team_id, user_id, user_name, userrole_id):
     #add practitioner role to OpenSRP (linking the user/practitioner to the team/organization)
     role = {}
     role['code'] = {"text": "Community Health Worker"}
-    role['identifier'] = userrole_id #needs to be created in python eg 
+    role['identifier'] = str(uuid.uuid4())
     role['active'] = True
     role['organization'] = team_id
     role['practitioner'] = user_id
@@ -542,13 +542,13 @@ def post_user(team_id, user_id, user_name, userrole_id):
     r = local_oauth.post('https://servermhealth.ddc.moph.go.th/opensrp/rest/practitionerRole', data=txt, headers = headers)
     print(r)
 
-def post_team(team_id, team_name):
+def post_team(team_name):
     local_conf = config['th-pl']
     local_oauth = OAuth2Session(client=LegacyApplicationClient(client_id=local_conf['client_id']))
     local_token = local_oauth.fetch_token(token_url=local_conf['token_url'], username=local_conf['username'], password=local_conf['password'], client_id=local_conf['client_id'], client_secret=local_conf['client_secret'])
     
     team = {}
-    team['identifier'] = team_id
+    team['identifier'] = str(uuid.uuid4())
     team['active'] = True
     team['name'] = team_name
     team['type'] = {"coding": [{"system":"http://terminology.hl7.org/CodeSystem/organization-type","code": "team","display": "Team"}]}
@@ -568,17 +568,17 @@ def setup_users():
     #         counter+=1
     #         #team_name,team_id,user_name,user_id,practitionerrole_id
     #         i=line.rstrip().split(',')
-    #         post_team(i[1],i[0])
+    #         post_team(i[0])
     
     with open('users.csv') as f:
         for line in f:
             if counter % 10 == 0:
                 logging.info("{0}".format(counter))
             counter+=1
-            #team_id, user_id, user_name, userrole_id
+            #team_id, user_id, user_name
             print(line)
             i=line.rstrip().split(',')
-            post_user(i[0],i[1],i[2],i[3])
+            post_user(i[0],i[1],i[2])
             logging.debug(line.split('\r\n')[0])
 
 
