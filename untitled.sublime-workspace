@@ -72,125 +72,12 @@
 	"buffers":
 	[
 		{
-			"contents": "\n\n[db]\nhost=134.209.198.201\ndatabase=dsme_location\nuser=postgres\npassword=A6.}Ht(u[PP6\n\nremote_host=134.209.198.201\nremote_database=dsme_location\nremote_user=postgres\nremote_password=A6.}Ht(u[PP6\n\n[ng-st]\n4 = 22abf4d2-c138-463c-8c58-568343dd2b5f\n3 = b5372a31-13f5-48f9-a441-bcb5adf8ac6e\n2 = be23a37f-ed46-4a28-8a69-c772b5ccaaa6\n1 = 7ac6c12d-5112-4ac9-b6b6-7ae871ce3993\n0 = bdae8d24-df16-47c1-b589-ff58038ba7ca\n\njurisdiction_depth = 4\nreveal_auth = ('supersetTester', 'Amani123')\nopenmrs_auth = ('pierre.dane', 'Pierre.dane1')\nurl_sd = reveal-stage\n\ndifferent_external_ids = 0\nadd_name_suffix = 0\n\nopenmrs_root_id = 9018d55f-089f-42d3-b9ec-78e7a1aa58ea\nopensrp_root_id = 12eaba32-55bb-4a67-b554-a28d9ab8e02a\n \nserver = ubuntu@34.243.236.111\ndbhost = reveal-stage.co1dqshnixcv.eu-west-1.rds.amazonaws.com\ndbpassword = UTd8jyDGN1&QNj1feQVZ\ndbuser = pierre\n\n\n\n[sz-st]\n3 = 22abf4d2-c138-463c-8c58-568343dd2b5f\n2 = 19592b42-5181-49e4-85ab-2c502e7193c1\n1 = d1c2eb52-191f-42f6-b0f3-07b16ba5e78e\n0 = bdae8d24-df16-47c1-b589-ff58038ba7ca\n\njurisdiction_depth = 3\nreveal_auth = ('supersetTester', 'Amani123')\nopenmrs_auth = ('pierre.dane', 'Pierre.dane1')\nurl_sd = reveal-stage\n\ndifferent_external_ids = 1\nadd_name_suffix = 0\n\nopenmrs_root_id = 703fdf23-0f4c-45a5-b099-5b38bd29c272\nopensrp_root_id = bac41d87-b09d-4e76-be3b-3b6d07399891\n \nserver = ubuntu@34.243.236.111\ndbhost = reveal-stage.co1dqshnixcv.eu-west-1.rds.amazonaws.com\ndbpassword = UTd8jyDGN1&QNj1feQVZ\ndbuser = pierre\n\n\n[th-st]\n5 = 22abf4d2-c138-463c-8c58-568343dd2b5f\n4 = 55a54fc4-a6f2-4e14-9132-815687952804\n3 = de2ec1a0-1609-4071-af32-a91752956e95\n2 = 19592b42-5181-49e4-85ab-2c502e7193c1\n1 = 563fba34-7bfa-40f7-a0e0-9dca3c24bfec\n\njurisdiction_depth = 5\nreveal_auth = ('supersetTester', 'Amani123')\nopenmrs_auth = ('pierre.dane', 'Pierre.dane1')\nurl_sd = reveal-stage\n\nopenmrs_root_id = 9797ea08-225c-4f0d-adbd-d68356577996\nopensrp_root_id = e89d0eb5-f8f7-40d0-9a2f-5ad78d935d55\n\n\n[zm-st]\t\t\n4=22abf4d2-c138-463c-8c58-568343dd2b5f\n3=b5372a31-13f5-48f9-a441-bcb5adf8ac6e\n2=19592b42-5181-49e4-85ab-2c502e7193c1\n1=563fba34-7bfa-40f7-a0e0-9dca3c24bfec\n0=bdae8d24-df16-47c1-b589-ff58038ba7ca\n\nreveal_auth = ('supersetTester', 'Amani123')\nopenmrs_auth = ('pierre.dane', 'Pierre.dane1')\nurl_sd = reveal-stage\n\nopenmrs_root_id = 9c3e8715-1c59-44db-9709-2b49f440ef00\nopensrp_root_id = \n\n\n[na-st]\n\n[th-pr]\n5 = 4373be11-57f8-4ac4-a61a-45f10a6ecca6\n4 = 4ffe0b58-ba3e-4ec8-b887-e1450930a08c\n3 = bc1119b6-9cc5-4762-8341-536bbeaf56b5\n2 = 4f53684b-0798-4131-8121-5f60cbead887\n1 = 38aa4efe-9daa-4afd-a449-3b4a275e14d7\n0 = a790105f-5b62-4fe9-822f-05ec23a5c08d\n\njurisdiction_depth = 5\nreveal_auth = ('pierre.dane', 'Pierre.dane1')\nopenmrs_auth = ('pierre.dane', 'Pierre.dane1')\t\nurl_sd = reveal-th\n\nopenmrs_root_id = a7c96800-f334-43f8-9797-70a26de3ec98\nopensrp_root_id = 4c10b50e-a240-4db9-8303-42faaa3b98e8\n\nserver = ubuntu@13.235.9.43\ndbhost = postgres.reveal-th.smartregister.org\ndbpassword = c$6q3DbH\n\n\n[zm-pr]\n4 = 26aad0d3-eeb4-4701-a0ed-12e5daa5f3da\n3 = 1d427f86-837b-477f-b0a2-ac2a356d838e\n2 = 548e3068-2fa9-4a07-8c2a-f44f1244f6ec\n1 = 4f16e7bd-958c-4857-892f-a8bc6068197b\n0 = ee9a09a4-bcad-49a3-8fe3-f25fe3c4649f\n\nreveal_auth = ('admin', 'QgPu7b00k4MDHk11PHH5hKZNf')\nopenmrs_auth = ('admin', 'QgPu7b00k4MDHk11PHH5hKZNf')\nurl_sd = reveal-zm\n\nopenmrs_root_id = 9fa7522c-605e-4dff-942b-cd67ef389a04\nopensrp_root_id = \n\nserver = ubuntu@18.202.22.195\ndbhost = postgres.reveal-zm.smartregister.org\ndbpassword = 4EiY4BjeqwUZTb\n\n[na-pr]\n3 = bc6bb8ea-ea00-43f5-83ae-1fc1e178f817\n2 = 790b4e70-45bf-4bc6-bf71-d2e67b675be2\n1 = cc98685c-e473-41b0-b7f7-befa3cc5f0ec\n0 = 8bda1bd9-81bb-4e9a-bd50-3920c9e41198\n\njurisdiction_depth = 3\nreveal_auth = ('admin', '9FGn2vVLSnt55dTyqXRKTqJ7ZG2nNz')\nopenmrs_auth = ('admin', '9FGn2vVLSnt55dTyqXRKTqJ7ZG2nNz')\nurl_sd = reveal-na\n\n\n\nopenmrs_root_id = c7df1eaa-50a5-4c6b-b16e-90ac008c962d'\nopensrp_root_id = \n\nserver = ubuntu@13.235.9.43\ndbhost = postgres.reveal-na.smartregister.org\ndbuser = pierre   \ndbpassword = UTd8jyDGN1&QNj1feQVZ\n\n\n#python dsme_location_management_new.py -f load_structures -t ou_th_test  -l 5\n\n#python dsme_location_management_new.py -f create_hierarchy -t organisation_unit_thai_trat_staging  -s e89d0eb5-f8f7-40d0-9a2f-5ad78d935d55  -m 9797ea08-225c-4f0d-adbd-d68356577996   -e 0  -d 5 -T\n\n#python dsme_location_management_new.py -f load_files",
-			"file": "reveal_upload/config/config.ini",
-			"file_size": 4205,
-			"file_write_time": 132355853081315112,
+			"file": ".gitignore",
 			"settings":
 			{
-				"buffer_size": 4336,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "reveal_upload/get_csv_thailand.sh",
-			"settings":
-			{
-				"buffer_size": 130,
+				"buffer_size": 499,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "reveal_upload/get_views_thailand.sh",
-			"settings":
-			{
-				"buffer_size": 110,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "reveal_upload/get_csv_stage.sh",
-			"settings":
-			{
-				"buffer_size": 131,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/Users/pierredane/Downloads/jurisdiction_metadata-target.csv",
-			"settings":
-			{
-				"buffer_size": 466,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/Users/pierredane/Downloads/jurisdiction_metadata-target-2.csv",
-			"settings":
-			{
-				"buffer_size": 90,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "reveal_upload/get_views_namibia.sh",
-			"settings":
-			{
-				"buffer_size": 112,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "reveal_upload/upload.py",
-			"settings":
-			{
-				"buffer_size": 24597,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "reveal_upload/fixgeometry.py",
-			"settings":
-			{
-				"buffer_size": 9238,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "-----BEGIN PGP PUBLIC KEY BLOCK-----\n\n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\nM+CsJELxbiIB78wdFv5Hwpg=\n=CjOj\n-----END PGP PUBLIC KEY BLOCK-----\n",
-			"file": "/Users/pierredane/Documents/PC  Dane (B892CF29) – Public.asc",
-			"file_size": 3159,
-			"file_write_time": 132397890471242511,
-			"settings":
-			{
-				"buffer_size": 3159,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/Users/pierredane/Downloads/PHDC_Admin_tables.sql",
-			"settings":
-			{
-				"buffer_size": 81023,
-				"encoding": "UTF-8",
-				"line_ending": "Unix",
-				"name": "USE [Admin_PHDC]"
-			}
-		},
-		{
-			"file": "/Users/pierredane/Downloads/Admin_PHDC_Objects.sql",
-			"settings":
-			{
-				"buffer_size": 126335,
-				"encoding": "UTF-8",
-				"line_ending": "Unix",
-				"name": "USE [Admin_PHDC]"
-			}
-		},
-		{
-			"file": "/Users/pierredane/Downloads/spv_all.sql",
-			"settings":
-			{
-				"buffer_size": 321554,
-				"encoding": "UTF-8",
-				"line_ending": "Unix",
-				"name": "USE [SPV]"
 			}
 		}
 	],
@@ -227,32 +114,58 @@
 	"expanded_folders":
 	[
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/15:30:03",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/config",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/toimport",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/toimport/location",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/toimport/location/th-pr",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql"
 	],
 	"file_history":
 	[
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/KAGAME/thailand/Household/geo.geojson",
+		"/Users/pierredane/Downloads/namibia-spray-relevance-rules.yml",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/KAGAME/thailand/thai_focus.json",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/KAGAME/thailand/th_vill.json",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/KAGAME/thailand/th_sub.json",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/KAGAME/thailand/th_dist.json",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/KAGAME/th_pr.json",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/KAGAME/keycloak.py",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/config/config.ini",
+		"/Users/pierredane/Downloads/DOH_Screening_WC_Report-2020_11_12.txt",
+		"/Users/pierredane/Downloads/Clean Reveal Users - orgs_add.csv",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/teams.csv",
+		"/Users/pierredane/Downloads/Clean Reveal Users - Sheet13.csv",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/users.csv",
+		"/Users/pierredane/Downloads/Clean Reveal Users - Sheet12.csv",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/upload.py",
+		"/Users/pierredane/Downloads/Clean Reveal Users - Sheet18.csv",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/upload_oauth.py",
+		"/Users/pierredane/Dropbox/Documents/Location/na_jurisdictions.json",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/get_csv_thailand.sh",
+		"/Users/pierredane/Downloads/spv_all.sql",
+		"/Users/pierredane/Downloads/Admin_PHDC_Objects.sql",
+		"/Users/pierredane/Downloads/PHDC_Admin_tables.sql",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/toimport/geojson/th-pr/training_areas.geojson",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/get_csv_stage.sh",
+		"/Users/pierredane/Downloads/jurisdiction_metadata-target.csv",
+		"/Users/pierredane/Documents/PC  Dane (B892CF29) – Public.asc",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql/generate_opensrp_ids.sql",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/fixgeometry.py",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql/run_merge.sql",
+		"/Users/pierredane/Downloads/data-1602227779362.json",
+		"/Users/pierredane/Dropbox/Documents/Location/nm_updated2.geojson",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/toimport/geojson/na-pr/nm.json",
+		"/Users/pierredane/Downloads/data-1602226259891.json",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql/insert_changeset.sql",
+		"/Users/pierredane/Downloads/jurisdiction_metadata-target-2.csv",
+		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/get_views_namibia.sh",
 		"/Users/pierredane/Dropbox/Documents/paot.json",
 		"/Users/pierredane/Dropbox/Documents/thailand_bednet_distribution.json",
 		"/Users/pierredane/Google Drive (pierre.dane@vitalwave.com)/Change requests/Eswatini/es_3_2020052813.json",
 		"/Users/pierredane/Google Drive (pierre.dane@vitalwave.com)/Change requests/Eswatini/es_4_2020052812.json",
 		"/Users/pierredane/Google Drive (pierre.dane@vitalwave.com)/Change requests/Eswatini/es_2_2020052813.json",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql/run_merge.sql",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql/create_scripts.sql",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql/insert_changeset.sql",
 		"/Users/pierredane/Downloads/nga_0_2020060210.json",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/get_csv_stage.sh",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/get_csv_namibia.sh",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/get_views_namibia.sh",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/imported/archive/Tak_5_additions_updates_2019112823.json",
 		"/Users/pierredane/Downloads/lusaka.geojson",
 		"/Users/pierredane/Downloads/get_data_from_biol.py",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/fixgeometry.py",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/toimport/geojson/ng-st/nga_1_2020060209.json",
 		"/Users/pierredane/Google Drive (pierre.dane@vitalwave.com)/Change requests/Eswatini/es_1_20201415.json",
 		"/Users/pierredane/Google Drive (pierre.dane@vitalwave.com)/Change requests/Eswatini/t/es_2_2020052813.json",
@@ -261,14 +174,11 @@
 		"/Users/pierredane/Google Drive (pierre.dane@vitalwave.com)/Change requests/Eswatini/t/es_1_20201415b.json",
 		"/Users/pierredane/Google Drive (pierre.dane@vitalwave.com)/Change requests/Eswatini/es_1_20201415.geojson",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/BiophicsSync/syncclients.py",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/config/config.ini",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/BiophicsSync/syncplans.py",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/toimport/geojson/es_3_2020052813.geojson",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql/set_opensrp_ids.sql",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql/add_suffix.sql",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql/set_opensrp_ids_from_external.sql",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql/generate_opensrp_ids.sql",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/upload.py",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/toimport/geojson/es_2_20201417.json",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/toimport/geojson/es_1_20201415.json",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/toimport/geojson/es_0_20201415.json",
@@ -279,7 +189,6 @@
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/sql/cc.json",
 		"/Users/pierredane/Dropbox/Documents/AHIE/NHLS/Kev/XD00849123nXD00849122",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/get_csv.sh",
-		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/get_csv_thailand.sh",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/get_views_thailand.sh",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/get_views_zambia.sh",
 		"/Users/pierredane/Dropbox/Documents/Vital Wave/DSME/location-scripts/reveal_upload/get_csv_zambia.sh",
@@ -336,35 +245,7 @@
 		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/populate_org_unit_raw2.sql",
 		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/populate_org_unit_reveal2.sql",
 		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/view_hierarchies2.sql",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/create_tables.sql",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/orgunittable.sql",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson_imported/regions_ADM1 copy.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/zam_reveal_provinces.geojson",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/vlgs_allOshakati_12_09_19.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/app.log",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/all_macepa_reveal_structures.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/dsme_location_management.py",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/app.log",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/villages_ADM3.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/demo.sql",
-		"/Users/pierredane/Dropbox/Documents/DSME/Namibia/Reveal GeoJSON/regions_ADM1.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/HRHETL",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/data.txt",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/guru99.txt",
-		"/Users/pierredane/Dropbox/Documents/DSME/git",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/regions_ADM1.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/namibia_ADM0.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/Namibia_Villages_Sept_10.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/dsme_location_management/geojson/districts_ADM2.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/python/test.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/plans.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/CDD/dsme_cdd.json",
-		"/Users/pierredane/Dropbox/Documents/DSME/CDD/dsme.json",
-		"/Users/pierredane/Dropbox/Documents/Thailand/python/helloworld.py",
-		"/Users/pierredane/Trat_Geojson/Trat_Village.geojson",
-		"/Users/pierredane/Dropbox/VitalWaveMalaria/Trat_files_json/Trat_Village.geojson",
-		"/Users/pierredane/Trat_files_json/Tart_Dist.json",
-		"/Users/pierredane/Trat_files_json/Trat_Prov.json"
+		"/Users/pierredane/Dropbox/Documents/DSME/Thailand/SQL/create_tables.sql"
 	],
 	"find":
 	{
@@ -382,6 +263,15 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"sp_",
+			"sp",
+			"uuid",
+			"d27bdd21-651e-4690-8f0d-a423779cf995",
+			"len",
+			"5e22331e-6fe2-442c-83f4-5087cdb457f6",
+			"'5e22331e-6fe2-442c-83f4-5087cdb457f6'",
+			"url_get_reveal_jurisdiction",
+			"structure",
 			"514c6b9e-fa22-4208-a8ea-3780397a5308",
 			"25fd72f4-5b3e-4d05-a954-06536601e477",
 			"3ea27b09-96fe-4be5-b29f-490d63275ace",
@@ -413,381 +303,35 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "reveal_upload/config/config.ini",
+					"file": ".gitignore",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4336,
+						"buffer_size": 499,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2873,
-								2855
+								499,
+								499
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 715.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "reveal_upload/get_csv_thailand.sh",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 130,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								130,
-								130
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/ShellScript/Bash.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "reveal_upload/get_views_thailand.sh",
-					"semi_transient": true,
-					"settings":
-					{
-						"buffer_size": 110,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								110,
-								110
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/ShellScript/Bash.sublime-syntax"
+							"syntax": "Packages/Git Formats/Git Ignore.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "reveal_upload/get_csv_stage.sh",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 131,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/ShellScript/Bash.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "/Users/pierredane/Downloads/jurisdiction_metadata-target.csv",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 466,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								466,
-								466
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "/Users/pierredane/Downloads/jurisdiction_metadata-target-2.csv",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 90,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								90,
-								90
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "reveal_upload/get_views_namibia.sh",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 112,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								112,
-								112
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/ShellScript/Bash.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "reveal_upload/upload.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 24597,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								15458,
-								15458
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 2.0,
-						"translation.y": 3180.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "reveal_upload/fixgeometry.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9238,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6876,
-								6876
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "/Users/pierredane/Documents/PC  Dane (B892CF29) – Public.asc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3159,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 12,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "/Users/pierredane/Downloads/PHDC_Admin_tables.sql",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 81023,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								81023,
-								81023
-							]
-						],
-						"settings":
-						{
-							"auto_name": "USE [Admin_PHDC]",
-							"syntax": "Packages/SQL/SQL.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 5.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 11,
-					"type": "text"
-				},
-				{
-					"buffer": 11,
-					"file": "/Users/pierredane/Downloads/Admin_PHDC_Objects.sql",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 126335,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								538,
-								538
-							]
-						],
-						"settings":
-						{
-							"auto_name": "USE [Admin_PHDC]",
-							"syntax": "Packages/SQL/SQL.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
-					"type": "text"
-				},
-				{
-					"buffer": 12,
-					"file": "/Users/pierredane/Downloads/spv_all.sql",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 321554,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								479,
-								479
-							]
-						],
-						"settings":
-						{
-							"auto_name": "USE [SPV]",
-							"syntax": "Packages/SQL/SQL.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
 					"type": "text"
 				}
 			]
@@ -870,7 +414,7 @@
 	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 428.0,
+	"side_bar_width": 464.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

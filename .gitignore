@@ -13,3 +13,9 @@ local_osm/config.ini
 local_osm/*.csv
 local_osm/*.geojson
 local_osm/*.xlsx
+KAGAME/*
+untitled.sublime-project
+./training*
+sql/cc.json
+
+
