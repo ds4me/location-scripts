@@ -15,7 +15,7 @@ local_osm/*.geojson
 local_osm/*.xlsx
 KAGAME/*
 untitled.sublime-project
-./training*
+train*
 sql/cc.json
 
 
