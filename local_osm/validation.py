@@ -1,6 +1,6 @@
 import argparse
-import paramiko
-from scp import SCPClient
+# import paramiko
+# from scp import SCPClient
 import os
 import sys
 import geopandas as gpd
@@ -11,6 +11,10 @@ import pandas as pd
 import json
 import geojson
 import numpy as np
+import configparser
+from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2 import LegacyApplicationClient
+import requests
 
 # def check_nulls_and_line_endings(gdf, colName):
 #     # Get a list of null values for the column
@@ -135,52 +139,133 @@ def load_and_validate_geojson(gjsonLoc):
 
 
 def download_reveal_jurisdictions():
-    # Get the location of the where the jurisdiction.csv file will be stored - local folder
-    jurisdictionFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "jurisdictions.csv")
+    # # Get the location of the where the jurisdiction.csv file will be stored - local folder
+    # jurisdictionFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "jurisdictions.csv")
+    #
+    # # Remove the jurisdictions file if it's already there
+    # if os.path.exists(jurisdictionFile):
+    #     os.remove(jurisdictionFile)
+    #
+    # # Get the private key location and create RSAKey, note that this will need to be changed for other computers
+    # # pkey_loc = "C:\\Users\\elija\\AppData\\Local\\Packages\\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\\LocalState\\rootfs\\home\\ubuntu\\.ssh\\id_rsa"
+    # pkey_loc = "C:/Users/efilip/.ssh/thai_upload"
+    # pkey = paramiko.RSAKey.from_private_key_file(pkey_loc)
+    #
+    # # Create a ssh client
+    # ssh = paramiko.SSHClient()
+    # ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    #
+    # # Connect to the staging server
+    # ssh.connect(hostname="134.209.198.201", username="root", pkey=pkey)
+    #
+    # # Run the get_csv_thailand.sh script to get the most recent data from Reveal
+    # ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("cd location-scripts/reveal_upload && ./get_csv_thailand.sh")
+    #
+    # # While loop until the command is completed
+    # while not ssh_stdout.channel.exit_status_ready():
+    #     continue
+    # # [print(line,end="") for line in iter(ssh_stdout.readline, "")]
+    # # [print(line,end="") for line in iter(ssh_stderr.readline, "")]
+    #
+    # # Track scp download progress and get the filename
+    # def progress(filename, size, sent):
+    #     progressString = f'{filename}\'s progress: {round(100 * (sent/size), 1)}%'
+    #     print(progressString, end="\r", flush=False)
+    #
+    # # Get the SCPClient
+    # scp = SCPClient(ssh.get_transport(), progress=progress)
+    #
+    # # Get the jurisdictions.csv and print a new line
+    # scp.get('/root/location-scripts/reveal_upload/toimport/locations/jurisdictions.csv')
+    # print(' ')
+    #
+    # # Close both the scp and ssh connections
+    # scp.close()
+    # ssh.close()
 
-    # Remove the jurisdictions file if it's already there
-    if os.path.exists(jurisdictionFile):
-        os.remove(jurisdictionFile)
+    # Get the location of the where the reveal.geojson file will be stored - local folder
+    jurisdictionFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "reveal.geojson")
 
-    # Get the private key location and create RSAKey, note that this will need to be changed for other computers
-    # pkey_loc = "C:\\Users\\elija\\AppData\\Local\\Packages\\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\\LocalState\\rootfs\\home\\ubuntu\\.ssh\\id_rsa"
-    pkey_loc = "C:/Users/efilip/.ssh/thai_upload"
-    pkey = paramiko.RSAKey.from_private_key_file(pkey_loc)
+    # Get the relevant details to obtain an oauth token
+    config = configparser.ConfigParser()
+    config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)),'config.ini'))
+    token_url = config['local_reveal']['token_url']
+    username = config['local_reveal']['username']
+    password = config['local_reveal']['password']
+    client_id = config['local_reveal']['client_id']
+    client_secret = config['local_reveal']['client_secret']
 
-    # Create a ssh client
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    # Get the token
+    oauth = OAuth2Session(client=LegacyApplicationClient(client_id=client_id))
+    token = oauth.fetch_token(token_url=token_url,username=username, password=password,client_id=client_id, client_secret=client_secret)
 
-    # Connect to the staging server
-    ssh.connect(hostname="134.209.198.201", username="root", pkey=pkey)
+    # Start the server version at 0 for pagination, set the request limit, and create a list for the locations
+    serverVersion = 0
+    limit = 5000
+    allLocations = []
 
-    # Run the get_csv_thailand.sh script to get the most recent data from Reveal
-    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("cd location-scripts/reveal_upload && ./get_csv_thailand.sh")
+    # Loop through paginated requests until explicitly told to stop
+    print('Downloading all reveal locations - this may take a few minutes...')
+    while serverVersion != -1:
 
-    # While loop until the command is completed
-    while not ssh_stdout.channel.exit_status_ready():
-        continue
-    # [print(line,end="") for line in iter(ssh_stdout.readline, "")]
-    # [print(line,end="") for line in iter(ssh_stderr.readline, "")]
+        # print(f'serverVersion: {serverVersion}')
 
-    # Track scp download progress and get the filename
-    def progress(filename, size, sent):
-        progressString = f'{filename}\'s progress: {round(100 * (sent/size), 1)}%'
-        print(progressString, end="\r", flush=False)
+        # Set the URL and headers
+        url = url = f'https://servermhealth.ddc.moph.go.th/opensrp/rest/location/getAll?is_jurisdiction=true&serverVersion={serverVersion}&limit={limit}&return_geometry=true'
+        headers = {"Authorization": "Bearer {}".format(token['access_token'])}
 
-    # Get the SCPClient
-    scp = SCPClient(ssh.get_transport(), progress=progress)
+        # Request from the server
+        r = requests.get(url, headers=headers)
 
-    # Get the jurisdictions.csv and print a new line
-    scp.get('/root/location-scripts/reveal_upload/toimport/locations/jurisdictions.csv')
-    print(' ')
+        # If there's an error, throw an exception with information
+        if(r.status_code != 200):
+            raise Exception(f'The following error occurred getting locations from {url}: {r.text}')
 
-    # Close both the scp and ssh connections
-    scp.close()
-    ssh.close()
+        # Otherwise, get a JSON of the response
+        locations = r.json()
+        # print(f'Num plans returned: {len(locations)}')
+
+        # Sleep for 5 seconds to prevent overloading the server
+        # sleep(5)
+
+        # If the number of returned locations equals the limit, there are more to get
+        if len(locations) == limit:
+            # Update the serverVersion and append locations to the list
+            serverVersion = locations[len(locations)-1]['serverVersion']
+            [allLocations.append(l) for l in locations[0:len(locations)-1]]
+
+        # Otherwise, append the last locations to the list and stop the loop
+        else:
+            [allLocations.append(l) for l in locations]
+            serverVersion = -1
+
+    # Save these to a file in the current folder
+    feats = geojson.FeatureCollection(allLocations)
+    with open(jurisdictionFile, 'w') as f:
+        geojson.dump(feats, f)
+
+    print('Reveal GeoJSON successfully downloaded')
 
     # return the location of the downloaded file
     return jurisdictionFile
+
+    # # Get all the locations - note that this may take awhile...
+    # print('Downloading all reveal locations - this may take a few minutes...')
+    # url = 'https://servermhealth.ddc.moph.go.th/opensrp/rest/location/getAll?is_jurisdiction=true&serverVersion=0&limit=50000&return_geometry=true'
+    # headers = {"Authorization": f'Bearer {token["access_token"]}'}
+    # r = requests.get(url, headers=headers)
+    # res = r.json()
+    #
+    # if r.status_code != 200:
+    #     raise Exception(f'Failed to get Reveal geojson: {res}')
+    #
+    # # Save these to a file in the current folder
+    # feats = geojson.FeatureCollection(res)
+    # with open(jurisdictionFile, 'w') as f:
+    #     geojson.dump(feats, f)
+    #
+    # # return the location of the downloaded file
+    # return jurisdictionFile
 
 
 def get_reveal_gdf(jurisdictionFile):
@@ -188,24 +273,27 @@ def get_reveal_gdf(jurisdictionFile):
     if not jurisdictionFile:
         jurisdictionFile = download_reveal_jurisdictions()
 
-    # Convert CSV coodinates to GeoJSON polygons
-    def get_polygon(row):
-        feat = geojson.Feature(geometry={
-                "type": "Polygon",
-                "coordinates": json.loads(row.coordinates)})
-        return shapely.geometry.Polygon(list(geojson.utils.coords(feat)))
+    # # Convert CSV coodinates to GeoJSON polygons
+    # def get_polygon(row):
+    #     feat = geojson.Feature(geometry={
+    #             "type": "Polygon",
+    #             "coordinates": json.loads(row.coordinates)})
+    #     return shapely.geometry.Polygon(list(geojson.utils.coords(feat)))
+    #
+    # # Load the CSV file
+    # revealCSV = pd.read_csv(jurisdictionFile, delimiter='|')
+    #
+    # # Create the geom
+    # geom = revealCSV.apply(lambda row: get_polygon(row),axis=1)
+    #
+    # # Create the GeoDataFrame
+    # rgdf = gpd.GeoDataFrame(revealCSV, crs="EPSG:4326", geometry=geom)
 
-    # Load the CSV file
-    revealCSV = pd.read_csv(jurisdictionFile, delimiter='|')
-
-    # Create the geom
-    geom = revealCSV.apply(lambda row: get_polygon(row),axis=1)
-
-    # Create the GeoDataFrame
-    rgdf = gpd.GeoDataFrame(revealCSV, crs="EPSG:4326", geometry=geom)
+    # Create the gdf
+    rgdf = gpd.read_file(jurisdictionFile)
 
     # rename the columns
-    rgdf = rgdf.rename({'externalid': 'externalId', 'parentid': 'parentId', 'geographiclevel': 'geographicLevel'}, axis=1)
+    # rgdf = rgdf.rename({'externalid': 'externalId', 'parentid': 'parentId', 'geographiclevel': 'geographicLevel'}, axis=1)
 
     # Remove those without an externalId
     rgdf = rgdf.dropna(subset=['externalId'])
@@ -247,7 +335,49 @@ def print_missing_hierarchy_members(list,type):
         singleLineVals = "\n".join(map(str,list))
         print(f'Missing {len(list)} {type}: \n{list}')
 
-def check_hierarchy(gdf, rgdf):
+
+
+def create_and_save_empty_geojson(gdf, missing):
+    feats = []
+    for x in missing:
+        ex_id = x
+        ex_parent_id = str(int(x) // 100) if len(x) > 2 else 0
+        geo_level = len(x) // 2
+        feat = geojson.Feature(
+            geometry={
+                "type": "Polygon",
+                "coordinates": []
+            },
+            properties={
+                "externalId": ex_id,
+                "name": 'FIXNAME',
+                "externalParentId": ex_parent_id,
+                "geographicLevel": geo_level
+            },
+        )
+        feats.append(feat)
+    for _, row in gdf.iterrows():
+        feat = geojson.Feature(
+            geometry={
+                "type": "Polygon",
+                "coordinates": [[[x,y] for x,y in row['geometry'].exterior.coords]]
+            },
+            properties={
+                "externalId": row['externalId'],
+                "name": row['name'],
+                "externalParentId": row['externalParentId'],
+                "geographicLevel": int(row['geographicLevel'])
+            },
+        )
+        feats.append(feat)
+    coll = geojson.FeatureCollection(feats)
+    saveFile = os.path.join(os.getcwd(),'validation_combined.geojson')
+    with open(saveFile, 'w', encoding='utf8') as f:
+        geojson.dump(coll, f, ensure_ascii=False)
+    print(f'Saved geojson with needed empty hierarchy members to {saveFile}')
+
+
+def check_hierarchy(gdf, rgdf, addMissing):
 
     # Get hierarchy needs
     justFoci = gdf.loc[(gdf.geographicLevel.astype(str) == '5')]
@@ -277,6 +407,12 @@ def check_hierarchy(gdf, rgdf):
         print_missing_hierarchy_members([x for x in missing if len(str(x)) == 4], 'districts')
         print_missing_hierarchy_members([x for x in missing if len(str(x)) == 6], 'sub-districts')
         print_missing_hierarchy_members([x for x in missing if len(str(x)) == 8], 'villages')
+
+        # Create empty geometry hierarchy members to facilitate easier uplaoding
+        if addMissing:
+            create_and_save_empty_geojson(gdf, missing)
+
+
 
 
 def check_overlaps(gdf, rgdf):
@@ -360,7 +496,9 @@ def valid_csv(csv):
 def main():
     parser = argparse.ArgumentParser(description="Script to validate GeoJSON foci before uploading to Reveal")
     parser.add_argument('geojson', type=valid_geojson, help="GeoJSON file to validate")
-    parser.add_argument('-j','--jurisdictions', dest="jurisdictionFile", type=valid_csv, help="Optional file location for pre-downloaded jurisdictions file")
+    # parser.add_argument('-j','--jurisdictions', dest="jurisdictionFile", type=valid_csv, help="Optional file location for pre-downloaded jurisdictions file")
+    parser.add_argument('-j','--jurisdictions', dest="jurisdictionFile", type=valid_geojson, help="Optional file location for pre-downloaded jurisdictions file")
+    parser.add_argument('--add_missing', dest="addMissing", action='store_true')
     args = parser.parse_args()
 
     # Load GeoJSON
@@ -382,7 +520,7 @@ def main():
 
     # Check hierarchy
     print('Checking for gaps in the hierarchy...')
-    check_hierarchy(gdf,rgdf)
+    check_hierarchy(gdf,rgdf, args.addMissing)
     print('')
 
     # Check self overlaps
@@ -390,6 +528,7 @@ def main():
     check_overlaps(gdf,gdf)
     print('')
 
+    # TODO: Filter Reveal geometry to remove any geometry that is going to be changed - i.e., updating boundaries
     # Check Reveal overlaps
     print('Checking for overlaps with current Reveal foci...')
     check_overlaps(gdf,rgdf)

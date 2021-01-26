@@ -11,15 +11,31 @@ from (
 ) l
 where jurisdiction_master.id = l.id;
 
+update structure_master
+set externalparentid = l.externalid
+from (
+	select c.id,  p.externalid
+	from structure_master c
+	inner join jurisdiction_master p on c.parentid = p.id
+) l
+where structure_master.id = l.id;
+
 -- populate mergeset with existing hierarchy from master list
 insert into mergeset (openSRP_Id, openMRS_Id,	openSRPParent_Id,openMRSParent_id ,externalId ,externalParentId ,status ,name ,name_en ,geographicLevel ,type ,coordinates )
 select id, openmrs_id, parentid, openmrsparentid,externalid, externalparentid, status, name, '', geographicLevel, type, coordinates
 from jurisdiction_master ;
 
+-- populate mergeset with existing structures from master list
+insert into mergeset (openSRP_Id,	openSRPParent_Id ,externalId ,externalParentId ,status ,name ,name_en ,geographicLevel ,type ,coordinates )
+select id , parentid ,externalid, externalparentid, status, name, '', geographicLevel, type, coordinates
+from structure_master ;
+
 -- insert into mergeset with new records from changeset
 insert into mergeset (externalid,externalparentid,status, name, name_en, geographicLevel, type, coordinates , operation)
-select 	externalId ,	externalParentId ,	status ,	name ,	name_en ,	geographicLevel ,	type ,	coordinates, 'i'
-from changeset where externalid not in (select externalid from jurisdiction_master);
+select 		c.externalId ,	c.externalParentId ,	c.status ,	c.name ,	c.name_en ,	c.geographicLevel ,	c.type ,	c.coordinates, 'i'
+from 		changeset c 
+left join 	jurisdiction_master j on j. externalid = c.externalid 
+where 		j.externalid is null;
 
 -- update mergeset with changeset changes
 update mergeset m
@@ -32,7 +48,7 @@ update 		mergeset  set operation = 'x'
 from 		jurisdiction_master ml
 where 		ml.externalid = mergeset.externalid
 and 		ml.externalparentid <>  mergeset.externalparentid
-and 		mergeset.operation is not null;
+and 		mergeset.operation is not null;	
 
 
 
@@ -77,22 +93,6 @@ from jurisdiction_master ml
 where ml.externalid = mergeset.externalid
 and ml.geographiclevel <> mergeset.geographiclevel
 and mergeset.operation = 'u';
-
---assign uuid for new jurisdictions
-update mergeset
-set opensrp_id = uuid_generate_v4()
-where operation = 'i' and opensrp_id is null;
-
---update mergeset opensrpparent_id from self
-update mergeset
-set opensrpparent_id = p.opensrp_id
-from mergeset p
-where mergeset.externalparentid = p.externalid and mergeset.opensrpparent_id is null;
-
---mark issues : no opensrp parent id
-update mergeset
-set operation = 'x'
-where opensrpparent_id is null and geographiclevel > 0;
 
 --temporary, don't process changes for those that don't need it so we an upload a list of all foci
 -- update mergeset set operation = null

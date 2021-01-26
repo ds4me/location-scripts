@@ -9,13 +9,12 @@ import os
 import configparser
 from datetime import datetime
 import csv
-
-
+from importlib import reload
+from requests_oauthlib import OAuth2Session
 reload(sys)
-sys.setdefaultencoding('utf-8')
 
 logging.basicConfig(filename='./logs/app.log', filemode='a',
-                    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+                    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 config = configparser.ConfigParser()
@@ -71,6 +70,11 @@ url_post_reveal_structure_batch = "https://{0}.smartregister.org/opensrp/rest/lo
 
 config.read('./config/config.ini')
 
+def xstr(s):
+    if s is None:
+        return ''
+    return str(s)
+
 def get_request(URL):
     auth = eval(cnconf['openmrs_auth']) if 'openmrs' in URL else eval(
         cnconf['reveal_auth'])
@@ -78,15 +82,17 @@ def get_request(URL):
     return response
 
 def post_request(URL, body, operation):
-    # logging.info(locals())
+    logging.info(type(body))
+    if type(body) == 'str':
+        body = body.encode('utf-8')
+    logging.info(type(body))
     auth = eval(cnconf['openmrs_auth']) if 'openmrs' in URL else eval(
         cnconf['reveal_auth'])
     response = ''
     if operation == 'i':
-        response = requests.post(URL, data=body, auth=auth, headers={
-                                 "Content-Type": "application/json"})
+        response = requests.post(URL, data=body, auth=auth, headers={"Content-Type": "application/json"})
     elif operation == 'u':
-        response = requests.put(URL, data=body, auth=auth, headers={
+        response = requests.put(URL, data=body.encode('utf-8'), auth=auth, headers={
                                 "Content-Type": "application/json"})
     return response
 
@@ -95,21 +101,21 @@ def post_reveal_location(id_opensrp, coordinates, id_parent_opensrp, location_na
     revealpost = json.dumps(revealtemplate)
 
     URL = url_post_reveal_jurisdiction.format(url_sd)
-    revealpost = revealpost.replace('$name', location_name)
-    revealpost = revealpost.replace('$nam_en', location_name_en)
-    revealpost = revealpost.replace('$id_openmrs', str(id_openmrs))
-    revealpost = revealpost.replace('$id_opensrp', str(id_opensrp))
-    revealpost = revealpost.replace('1111111111', str(coordinates))
-    revealpost = revealpost.replace('$id_parent_opensrp', str(id_parent_opensrp))
-    revealpost = revealpost.replace('2222222222', str(geographicLevel))
+    revealpost = revealpost.replace('$name', xstr(location_name))
+    revealpost = revealpost.replace('$nam_en', xstr(location_name_en))
+    revealpost = revealpost.replace('$id_openmrs', xstr(id_openmrs))
+    revealpost = revealpost.replace('$id_opensrp', xstr(id_opensrp))
+    revealpost = revealpost.replace('1111111111', xstr(coordinates))
+    revealpost = revealpost.replace('$id_parent_opensrp', xstr(id_parent_opensrp))
+    revealpost = revealpost.replace('2222222222', xstr(geographicLevel))
     revealpost = revealpost.replace('$id_external', id_external)
-    revealpost = revealpost.replace('$type', str(geometry_type))
+    revealpost = revealpost.replace('$type', xstr(geometry_type))
     # todo: clean up string replacement above
     logging.debug('POST REVEAL URL: ' + URL)
     logging.debug('POST REVEAL BODY: ' + revealpost)
 
     if test_run == False:
-        response = post_request(URL, revealpost, operation)
+        response = post_request(URL, revealpost.encode('utf-8'), operation)
         logging.info(response.text)
     else:
         logging.debug("Skipping Reveal post - test run")
@@ -148,7 +154,7 @@ def check_existing_openmrs_location(openmrs_name):
     logging.debug(c.text)
     uuid = ''
     for l in geo["results"]:
-        if(l["display"].encode('utf8').lower() == openmrs_name.lower()):
+        if(l["display"].lower() == openmrs_name.lower()):
             uuid = l["uuid"]
             logging.debug('Found uuid {0}'.format(uuid))
             break
@@ -164,16 +170,16 @@ def post_openmrs_location(parent_id_openmrs, location_name, geographicLevel, ope
     openmrspost = json.dumps(
         openmrstemplate, ensure_ascii=False).encode('utf8')
     # for DSME we assume the parent is already created in OpenMRS (e.g. Thailand, which does not exist in Reveal i.e. no level 0 in Reveal)
-    openmrspost = openmrspost.replace('$parentuuid', parent_id_openmrs)
-    openmrspost = openmrspost.replace('$name', location_name)
+    openmrspost = openmrspost.replace('$parentuuid'.encode('utf8'), parent_id_openmrs.encode('utf8'))
+    openmrspost = openmrspost.replace('$name'.encode('utf8'), location_name.encode('utf8'))
     openmrspost = openmrspost.replace(
-        '$hierarchytag', cnconf[str(geographicLevel)])
+        '$hierarchytag'.encode('utf8'), cnconf[str(geographicLevel)].encode('utf8'))
 
     logging.debug(openmrspost)
     logging.debug('POST OPENMRS: $parentuuid: %s ,$name: %s, $hierarchytag: %s  ',
                   parent_id_openmrs, location_name, openmrs_hierarchy_tag)
     if test_run == False:
-        c = post_request(URL, openmrspost.encode('utf-8'), operation)
+        c = post_request(URL, openmrspost, operation)
         logging.debug(c.text)
 
         if(c.status_code == 400):
@@ -183,7 +189,7 @@ def post_openmrs_location(parent_id_openmrs, location_name, geographicLevel, ope
                 raise ValueError(
                     "SERVER ERROR openMRS id cannot be found for that name")
         elif(c.status_code == 500):
-            logging.info('ERROR: ' + openmrspost.encode('utf-8'))
+            logging.info('ERROR: ' + openmrspost)
 
             raise ValueError("SERVER ERROR " + c.text)
         else:  # post request suceeded
@@ -195,7 +201,7 @@ def post_openmrs_location(parent_id_openmrs, location_name, geographicLevel, ope
 
 def total_locations(id_parent_external):
     #sql = 'SELECT count(*)  from '+ ou_table  + ' where issue = false and externalParentId =' + "'" + id_parent_external + "'"
-    sql = 'SELECT count(*)  from mergeset where operation is not null and processed is null'
+    sql = "SELECT count(*) from mergeset where operation is not null and operation != 'x' and processed is null"
     cur = conn.cursor()
     cur.execute(sql)
     counts = cur.fetchall()
@@ -311,7 +317,7 @@ def load_jurisdictions(id_parent_external, id_parent_opensrp='', id_parent_openm
             openMRS_id = location['id_openmrs']
 
         logging.debug("depth: " + str(jurisdiction_depth))
-        if location['geographic_level'] < jurisdiction_depth:
+        if int(location['geographic_level']) < int(jurisdiction_depth):
             load_jurisdictions(
                 location['id_external'], location['id_opensrp'], openMRS_id)
         # add to openSRP
@@ -321,6 +327,7 @@ def load_files():
     global country
 
     geo_path = './toimport/geojson/{0}'.format(country)
+    logging.info(geo_path)
     location_path = './toimport/location/{0}'.format(country)
     sql_path = '../sql'
     files = []
@@ -331,8 +338,8 @@ def load_files():
     cur = conn.cursor()
     logging.info('   Truncating database tables')
     sql = ("truncate table geojson_file; truncate table changeset; truncate table mergeset; truncate table jurisdiction_master; truncate table structure_master;")
-    #cur.execute(sql)
-    #conn.commit()
+    cur.execute(sql)
+    conn.commit()
     logging.info('   Loading geoJSON files @ {0}'.format(geo_path))
     for r, d, f in os.walk(geo_path):
         for file in f:
@@ -346,8 +353,8 @@ def load_files():
                     if data != '':
                         geo = json.dumps(data).replace("'", "")
                         sql = ("insert into geojson_file (file, file_name) values ('{0}', '{1}');").format(geo, file)
-                        #cur.execute(sql)
-                        #conn.commit()
+                        cur.execute(sql)
+                        conn.commit()
                     else:
                         logging.info("no data")
 
@@ -356,8 +363,8 @@ def load_files():
     with open('{0}/{1}'.format(sql_path, 'insert_changeset.sql')) as sql_file:
         sql = sql_file.read()
         logging.debug(sql)
-       #cur.execute(sql)
-       #conn.commit()
+        cur.execute(sql)
+        conn.commit()
 
     abspath = os.path.abspath('{0}/jurisdictions.csv'.format(location_path))
     logging.info('   Importing master jurisdiction CSV file from: {0}'.format(abspath))
@@ -388,7 +395,7 @@ def load_files():
         conn.commit()
 
     id_sql = ''
-    if cnconf['different_external_ids'] == 1:
+    if cnconf['different_external_ids'] == '1':
         id_sql = 'generate_opensrp_ids.sql'
     else:
          id_sql = 'set_opensrp_ids_from_external.sql'
@@ -399,12 +406,12 @@ def load_files():
         cur.execute(sql)
         conn.commit()
 
-    if cnconf['add_name_suffix'] == 1:
+    if cnconf['add_name_suffix'] == '1':
         logging.info('   Running SQL: {0}'.format('add_suffix.sql'))
         with open('{0}/{1}'.format(sql_path, 'add_suffix.sql')) as sql_file:
             sql = sql_file.read()
             logging.debug(sql)
-            #ur.execute(sql)
+            cur.execute(sql)
             conn.commit()
 
     logging.info('Completed load_files successfully')
@@ -483,6 +490,21 @@ def load_structures():
             structures = []
     return
 
+def test_oauth():
+    client_id = cnconf['client_id']
+    client_secret = cnconf['client_secret']
+    username = cnconf['username']
+    passwrdr = cnconf['passwrod']
+    token_url = cnconf['token_url']
+    redirect_uri =''
+    authorization_response = ''
+    scope = ''
+    oauth = OAuth2Session(client_id, redirect_uri=redirect_uri,scope=scope)
+    token = oauth.fetch_token(token_url, authorization_response=authorization_response, client_secret=client_secret)
+    URL = url_get_reveal_jurisdictions.format(url_sd, '0')
+    r = oauth.get(URL)
+    print(r)
+
 def main(argv):
     logging.info("start")
     global conn
@@ -508,12 +530,12 @@ def main(argv):
         opts, args = getopt.getopt(argv, "hf:so:t:l:Tjpe:d:m:c:", [
                                    "funct=", "skip_csv", "oname=", "table=", "level=", "testrun", "jurisdiction_only", "put", "external_parent_id=", "depth=", "openmrs_root=", "country="])
     except getopt.GetoptError as e:
-        print 'Use e -h for help'
-        print e
+        print('Use e -h for help')
+        print(e)
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'dsme_location_management.py -f <function>'
+            print('dsme_location_management.py -f <function>')
             sys.exit()
         elif opt in ("-f", "--function"):
             function = arg
@@ -530,12 +552,12 @@ def main(argv):
     logging.info("function: {0}".format(function))
     #all of these functions require a country code to get configuration
     if country == '':
-    	print "Please specify a country and environment e.g. th-st"
+    	print('Please specify a country and environment e.g. th-st')
     	sys.exit()
     else:
     	cnconf = config[country]
 
-	database = '{0}_{1}'.format(config['db']['database'],country.replace('-','_'))
+    database = '{0}_{1}'.format(config['db']['database'],country.replace('-','_'))
     logging.info('database: {0}'.format(database))
     conn = psycopg2.connect(host=config['db']['host'], database=database, user=config['db']['user'], password=config['db']['password'])
 
@@ -546,19 +568,21 @@ def main(argv):
         url_sd = cnconf['url_sd']
         logging.info("create_hierarchy")
         if external_parent_id == '':
-            print "Please specify the externalid of the root location (e.g. the country external id (for thailand this is '0')"
+            print('Please specify the externalid of the root location (e.g. the country external id (for thailand this is "0")')
         else:
             locations_total = total_locations(external_parent_id)
             logging.info('Total locations to add: {0}'.format(locations_total))
             load_jurisdictions(external_parent_id)
     elif function == 'load_files':
         load_files()
+    elif function == 'oauth':
+        test_oauth()
     elif function == 'load_structures':
         url_sd = cnconf['url_sd']
         jurisdiction_depth = cnconf['jurisdiction_depth']
        # if ou_table == '':
         if country == '':
-            print "Please specify a country and environment e.g. th-st"
+            print('Please specify a country and environment e.g. th-st')
         else:
             load_structures()
     conn.close()
