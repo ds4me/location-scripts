@@ -65,7 +65,7 @@ def create_reveal_feature(token, feat, baseUrl):
     return [{
         "type": "Feature",
         "id": str(uuid4()),
-        "geometry": feat['geometry'],
+        "geometry": feat['geometry'] if feat['geometry'] != None else {"type": "Polygon", "coordinates": []},
         "properties": {
             "status": "Active",
             "parentId": parent["id"],
