@@ -184,7 +184,7 @@ def download_reveal_jurisdictions():
     # ssh.close()
 
     # Get the location of the where the reveal.geojson file will be stored - local folder
-    jurisdictionFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "reveal.geojson")
+    jurisdictionFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "reveal_features_local.geojson")
 
     # Get the relevant details to obtain an oauth token
     config = configparser.ConfigParser()
