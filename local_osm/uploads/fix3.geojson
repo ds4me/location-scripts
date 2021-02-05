@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "fix",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": "15346831-70e1-4680-8a01-faeec6d44877", "status": "Active", "parentId": "52ac22bd-6f0f-4314-b905-fa92be5cc372", "name": "หมู่ที่ 2 (65020202)", "geographicLevel": 4, "version": 0, "OpenMRS_Id": null, "externalId": "65020202", "name_en": " (65020202)", "username": null }, "geometry": { "type": "Polygon", "coordinates": [ ] } },
+{ "type": "Feature", "properties": { "id": "3672da62-13df-4329-82ae-ff59202f4c19", "status": "Active", "parentId": "93abc2b5-3310-4dab-9334-0b38db39a09c", "name": "หมู่ที่ 3 (82030503)", "geographicLevel": 4, "version": 0, "OpenMRS_Id": null, "externalId": "82030503", "name_en": " (82030503)", "username": null }, "geometry": { "type": "Polygon", "coordinates": [ ] } },
+{ "type": "Feature", "properties": { "id": "5b8496aa-96ed-44e4-91ab-2255a3d1019f", "status": "Active", "parentId": "733be3e1-db14-4ea0-abd5-22b5abcc34db", "name": "หมู่ที่ 11 (65080811)", "geographicLevel": 4, "version": 0, "OpenMRS_Id": null, "externalId": "65080811", "name_en": " (65080811)", "username": null }, "geometry": { "type": "Polygon", "coordinates": [ ] } },
+{ "type": "Feature", "properties": { "id": "bcb57a2f-be68-4e9c-ab09-5b3fd4d3e418", "status": "Active", "parentId": "cbdfd2ad-fbdf-4200-a6fa-ca7bbc979425", "name": "คลองนา (240104)", "geographicLevel": 3, "version": 1, "OpenMRS_Id": null, "externalId": "240104", "name_en": " (240104)", "username": null }, "geometry": { "type": "Polygon", "coordinates": [ ] } },
+{ "type": "Feature", "properties": { "id": "4a3756b7-34cb-417e-a3f3-2d008a8f5655", "status": "Active", "parentId": "bcb57a2f-be68-4e9c-ab09-5b3fd4d3e418", "name": "หมู่ที่ 2 (24010402)", "geographicLevel": 4, "version": 1, "OpenMRS_Id": null, "externalId": "24010402", "name_en": " (24010402)", "username": null }, "geometry": { "type": "Polygon", "coordinates": [ ] } }
+]
+}

@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "create_1dist_1subdist_1vill_2foci_local",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "externalId": "2401", "name": "เมืองฉะเชิงเทรา", "externalParentId": "24", "geographicLevel": 2 }, "geometry": { "type": "Polygon", "coordinates": [ ] } },
+{ "type": "Feature", "properties": { "externalId": "240104", "name": "คลองนา", "externalParentId": "2401", "geographicLevel": 3 }, "geometry": { "type": "Polygon", "coordinates": [ ] } },
+{ "type": "Feature", "properties": { "externalId": "24010402", "name": "หมู่ที่ 2", "externalParentId": "240104", "geographicLevel": 4 }, "geometry": { "type": "Polygon", "coordinates": [ ] } },
+{ "type": "Feature", "properties": { "externalId": "2401040201", "name": "ทรายมูล", "externalParentId": "24010402", "geographicLevel": 5 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 101.09917, 13.650381 ], [ 101.100329, 13.652932 ], [ 101.104151, 13.656309 ], [ 101.10668, 13.655709 ], [ 101.108398, 13.651169 ], [ 101.107761, 13.648505 ], [ 101.103823, 13.648111 ], [ 101.099885, 13.64843 ], [ 101.09917, 13.650381 ] ] ] } },
+{ "type": "Feature", "properties": { "externalId": "8410030705", "name": "สะพานเต่า", "externalParentId": "84100307", "geographicLevel": 5 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 98.650696, 8.884324 ], [ 98.650696, 8.884324 ], [ 98.652863, 8.884345 ], [ 98.651747, 8.881494 ], [ 98.647187, 8.877911 ], [ 98.645546, 8.873586 ], [ 98.647262, 8.872038 ], [ 98.637778, 8.868095 ], [ 98.599069, 8.839366 ], [ 98.59409, 8.857791 ], [ 98.611986, 8.874434 ], [ 98.633723, 8.879204 ], [ 98.650696, 8.884324 ] ] ] } }
+]
+}
