@@ -13,6 +13,8 @@ import rtree
 import shapely
 import tempfile
 from uuid import uuid4
+from datetime import datetime
+from time import sleep
 
 '''
     Full upload script for pulling from OSM, validing the foci, and pushing updates to the server
@@ -63,12 +65,18 @@ def get_osm_features(config, action, fociIds):
     print(f'Downloaded {len(fc["features"])} features')
 
     filteredOsmFeats = [x for x in fc["features"] if x['properties']['externalId'] in fociIds]
-    if len(filteredOsmFeats) != len(fociIds):
-        print(f'{len(filteredOsmFeats)} of the {len(fociIds)} foci could be found on bvbdosm, double check that they are mapped and have the correct description')
-
-    osmGdf = gpd.GeoDataFrame.from_features(filteredOsmFeats, crs="EPSG:4326")
-    print(f'Filtered to the {len(fociIds)} foci to {action}')
-    return osmGdf
+    diff = len(filteredOsmFeats) - len(fociIds)
+    if diff > 0:
+        print(f'Entered Foci IDs: {fociIds}, Filtered OSM Features (externalId, osmid): {[(x["properties"]["externalId"], x["properties"]["osmid"]) for x in filteredOsmFeats]}')
+        raise TypeError(f'There are {diff*2} foci with the same external ID, double check and fix any duplicates on bvbdosm')
+    elif diff < 0:
+        print(f'Entered Foci IDs: {fociIds}, Filtered OSM Features (externalId, osmid): {[(x["properties"]["externalId"], x["properties"]["osmid"]) for x in filteredOsmFeats]}')
+        missingStr = f'There is 1 missing focus' if abs(diff) == 1 else f'There are {abs(diff)} missing foci'
+        raise TypeError(f'{missingStr}, please double check that these have been mapped on bvbdosm')
+    else:
+        osmGdf = gpd.GeoDataFrame.from_features(filteredOsmFeats, crs="EPSG:4326")
+        print(f'Filtered to the {len(fociIds)} foci to {action}')
+        return osmGdf
 
 
 def download_reveal_jurisdictions(token):
@@ -136,15 +144,20 @@ def check_size(gdf, min_area, max_area):
     smallFoci = justFoci.loc[justFoci['geometry'].area <= min_area].externalId
     largeFoci = justFoci.loc[justFoci['geometry'].area >= max_area].externalId
 
-    # TODO: would be good to print the 10 digit ID and the area of the location so that users are aware just how big/small it is
     if len(smallFoci):
         smallFoci = smallFoci.sort_values()
-        singleLineSmallFoci = "\n".join(map(str,smallFoci))
-        print(f'Verify that the following {len(smallFoci)} small foci are correct: \n{singleLineSmallFoci}')
+        smallFoci['area'] = smallFoci.geometry.area
+        print(f'Verify that the following {len(smallFoci)} small foci are correct:')
+        print(smallFoci.loc(['externalId', 'osmid', 'area']))
+        # singleLineSmallFoci = "\n".join(map(str,smallFoci))
+        # print(f'Verify that the following {len(smallFoci)} small foci are correct: \n{singleLineSmallFoci}')
     if len(largeFoci):
         largeFoci = largeFoci.sort_values()
-        singleLineLargeFoci = "\n".join(map(str, largeFoci))
-        print(f'Verify that the following {len(largeFoci)} large foci are correct: \n{singleLineLargeFoci}')
+        largeFoci['area'] = largeFoci.geometry.area
+        print(f'Verify that the following {len(largeFoci)} are correct:')
+        print(largeFoci.loc(['externalId', 'osmid', 'area']))
+        # singleLineLargeFoci = "\n".join(map(str, largeFoci))
+        # print(f'Verify that the following {len(largeFoci)} large foci are correct: \n{singleLineLargeFoci}')
     if not len(smallFoci) and not len(largeFoci):
         print("Foci sizes are okay!")
     print()
@@ -417,9 +430,7 @@ def get_action_and_foci():
     print('\n***************************************************************')
     print('Script to pull foci from bvbdosm and upload them into Reveal')
     print('***************************************************************\n')
-    print('To get started, what would you like to do?')
-    print('    1. Upload new foci')
-    print('    2. Edit existing foci')
+    print('To get started, would you like to upload new foci or edit exiting foci?')
     action = None
     while action is None:
         action = input('(upload/edit): ')
@@ -427,7 +438,7 @@ def get_action_and_foci():
             print(f'"{action}" is not a valid option, please type either "upload" or "edit" to start')
             action = None
 
-    print(f'\nWhich foci would you like to {action}? Please enter as a comma seperated list')
+    print(f'\nWhich foci would you like to {action}? Please enter as a comma-separated list')
     fociIds = None
     while fociIds is None:
 
@@ -451,8 +462,11 @@ def get_reveal_gdf(config, action, fociIds, token):
             print(f'"{getRevealJurisdictions}" is not a valid option, please type either "y" or "n"')
             getRevealJurisdictions = None
 
-    jurisdictionFile = './reveal_features_local.geojson'
+    jurisdictionFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'reveal_features_local.geojson')
     if getRevealJurisdictions == 'y':
+        jurisdictionFile = download_reveal_jurisdictions(token)
+    elif getRevealJurisdictions == 'n' and not os.path.exists(jurisdictionFile):
+        print(f'The jurisdiction file doesn\'t exist in the expected location: {jurisdictionFile}')
         jurisdictionFile = download_reveal_jurisdictions(token)
 
     print(f'\nLoading Reveal hierarchy ({jurisdictionFile}) into memory...')
@@ -507,6 +521,7 @@ def push_changes_to_reveal(config, osmGdf, action, token):
         numFeats = len(data['features'])
 
         # Loop through the features in the GeoJSON file - note that they should be sorted by geographicLevel
+        print('')
         for index, feat in enumerate(data['features']):
 
             # Switch on the type of operation
@@ -522,7 +537,7 @@ def push_changes_to_reveal(config, osmGdf, action, token):
             send_to_reveal(token, reveal_feature, index, numFeats, action, baseUrl, 'local')
 
             # Sleep to prevent overloading the server
-            # sleep(5)
+            sleep(2)
 
         # Clean up temp file
         os.remove(geojsonLoc)
@@ -530,20 +545,29 @@ def push_changes_to_reveal(config, osmGdf, action, token):
     else:
         print('No foci pushed to Reveal')
 
+
+def saveChanges(osmGdf, action):
+    if not os.path.isdir('./uploads'):
+        os.makedir('./uploads')
+    saveFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'uploads', f'{action} {datetime.now().strftime("%Y-%m-%d %H_%M_%S")}.geojson')
+    osmGdf.to_file(saveFile, driver="GeoJSON")
+    print(f'\nGeoJSON of the {action}ed {"jurisdictions have" if len(osmGdf) > 1 else "jurisdiction has"} been saved to: {saveFile}')
+
+
 def main():
 
     # Get the config details from config.ini to be used throughout
     config = configparser.ConfigParser()
     config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)),'config.ini'))
 
-    # Get the token for downloading the Reveal hierarchy and uploading the edits/new foci
-    token = get_oauth_token(config, 'local')
-
     # Get user input on actions and user foci
     action, fociIds = get_action_and_foci()
 
     # Get the filtered features from bvbdosm
     osmGdf = get_osm_features(config, action, fociIds)
+
+    # Get the token for downloading the Reveal hierarchy and uploading the edits/new foci
+    token = get_oauth_token(config, 'local')
 
     # Get the entire hierarachy from Reveal
     rgdf = get_reveal_gdf(config, action, fociIds, token)
@@ -557,15 +581,14 @@ def main():
     # Check self overlaps
     check_overlaps(osmGdf,osmGdf)
 
-    # TODO: Filter Reveal geometry to remove any geometry that is going to be changed - i.e., updating boundaries
-    # Check Reveal overlaps
-    check_overlaps(osmGdf,rgdf)
+    # Check Reveal overlaps, filtering out those that will change from the Reveal jurisdictions
+    check_overlaps(osmGdf, rgdf[~rgdf.externalId.isin(osmGdf['externalId'].to_list())])
 
     # Upload the changes
     push_changes_to_reveal(config, osmGdf, action, token)
 
-    # TODO: add details of the uploads to an Excel file? Or a folder with .geojson files?s
-
+    # Save changes to a GeoJSON in the ./upload folder
+    saveChanges(osmGdf, action)
 
 if __name__ == '__main__':
     main()
