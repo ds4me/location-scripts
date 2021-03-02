@@ -38,7 +38,7 @@ def print_hierarchy_details(gdf, name):
 def get_osm_features(config, action, fociIds):
     print(f'\nDownloading all foci from bvbdosm...')
     url = config['local_osm']['url'] + '/api/get_all_ways'
-    r = requests.get(url)
+    r = requests.get(url, timeout=15)
     fc = r.json()
 
     for feature in fc['features']:
@@ -62,9 +62,15 @@ def get_osm_features(config, action, fociIds):
         props['name'] = name
         del props['description']
 
-    # TODO: check if this is valid GEOJSON?
-    print(f'Downloaded {len(fc["features"])} features')
+    # Save the features so that the most up-to-date copy is always in the folder
+    saveFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'bvbdosm.geojson')
+    with open(saveFile, 'w', encoding='utf8') as f:
+        geojson.dump(fc,f, ensure_ascii=False)
 
+    # TODO: check if this is valid GEOJSON?
+    print(f'Downloaded {len(fc["features"])} features and saved a copy (with corrected tags) to {saveFile}')
+
+    # Filter features and make sure they match the number of foci requested
     filteredOsmFeats = [x for x in fc["features"] if x['properties']['externalId'] in fociIds]
     diff = len(filteredOsmFeats) - len(fociIds)
     if diff > 0:
@@ -79,7 +85,7 @@ def get_osm_features(config, action, fociIds):
         raise TypeError(f'{missingStr}, please double check that these have been mapped on bvbdosm')
     else:
         osmGdf = gpd.GeoDataFrame.from_features(filteredOsmFeats, crs="EPSG:4326")
-        print(f'Filtered to the {len(fociIds)} foci to {action}')
+        print(f'Filtered the OSM foci to the {len(fociIds)} foci to {action}')
         return osmGdf
 
 
@@ -104,7 +110,7 @@ def download_reveal_jurisdictions(token):
         headers = {"Authorization": "Bearer {}".format(token['access_token'])}
 
         # Request from the server
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=headers, timeout=15)
 
         # If there's an error, throw an exception with information
         if(r.status_code != 200):
@@ -145,21 +151,21 @@ def check_size(gdf, min_area, max_area):
     justFoci = gdf.loc[(gdf.geographicLevel.astype(str) == '5')]
 
     # Filter out any foci that meet the criteria
-    smallFoci = justFoci.loc[justFoci['geometry'].area <= min_area].externalId
-    largeFoci = justFoci.loc[justFoci['geometry'].area >= max_area].externalId
+    smallFoci = justFoci.loc[justFoci['geometry'].area <= min_area]
+    largeFoci = justFoci.loc[justFoci['geometry'].area >= max_area]
 
     if len(smallFoci):
-        smallFoci = smallFoci.sort_values()
+        smallFoci = smallFoci.sort_values(by=['externalId'])
         smallFoci['area'] = smallFoci.geometry.area
         print(f'Verify that the following {len(smallFoci)} small foci are correct:')
-        print(smallFoci.loc(['externalId', 'osmid', 'area']))
+        print(smallFoci[['externalId', 'osmid', 'area']])
         # singleLineSmallFoci = "\n".join(map(str,smallFoci))
         # print(f'Verify that the following {len(smallFoci)} small foci are correct: \n{singleLineSmallFoci}')
     if len(largeFoci):
-        largeFoci = largeFoci.sort_values()
+        largeFoci = largeFoci.sort_values(by=['externalId'])
         largeFoci['area'] = largeFoci.geometry.area
-        print(f'Verify that the following {len(largeFoci)} are correct:')
-        print(largeFoci.loc(['externalId', 'osmid', 'area']))
+        print(f'Verify that the following {len(largeFoci)} large foci are correct:')
+        print(largeFoci[['externalId', 'osmid', 'area']])
         # singleLineLargeFoci = "\n".join(map(str, largeFoci))
         # print(f'Verify that the following {len(largeFoci)} large foci are correct: \n{singleLineLargeFoci}')
     if not len(smallFoci) and not len(largeFoci):
@@ -347,22 +353,27 @@ def get_oauth_token(config, server):
 
 def api_get_request(url, token):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
-    r = requests.get(url, headers=headers)
+    r = requests.get(url, headers=headers, timeout=5)
     return r.json()
 
 
 def api_post_request(url, token, json):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
-    r = requests.post(url, headers=headers, json=json)
-    # print(r.text)
-    return r.status_code
+    try:
+        r = requests.post(url, headers=headers, json=json, timeout=5)
+        return r.status_code
+    except requests.exception.Timeout:
+        return 999
 
 
 def api_put_request(url, token, json):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
-    r = requests.put(url, headers=headers, json=json)
-    # print(r.text)
-    return r.status_code
+    try:
+        r = requests.put(url, headers=headers, json=json, timeout=5)
+        return r.status_code
+    except requests.exceptions.Timeout:
+        return 999
+
 
 
 def get_location(token, externalId, baseUrl):
@@ -370,11 +381,12 @@ def get_location(token, externalId, baseUrl):
     res = api_get_request(url, token)
     if len(res) == 0:
         raise Exception(f'Cannot find the location with the following externalId: {externalId}')
-    elif len(res) > 1:
-        print('More than one location returned, looping through to return the first status="Active" focus')
-        return [x for x in res if x['properties']['status'] == "Active"][0]
-    else:
-        return res[0]
+
+    activeFocus = [x for x in res if x['properties']['status'] == 'Active']
+    if len(activeFocus) > 1:
+        print('More than one active location returned, looping through to return the first status="Active" focus')
+
+    return activeFocus[0]
 
 
 def create_reveal_feature(token, feat, baseUrl):
@@ -415,7 +427,7 @@ def update_reveal_feature_geometry(token, feat, baseUrl):
     return [location]
 
 
-def send_to_reveal(token, feat, index, numFeats, action, baseUrl, server):
+def send_to_reveal(token, feat, baseUrl, action):
     if action == 'edit':
         url = f'{baseUrl}/opensrp/rest/location?is_jurisdiction=true'
         status = api_put_request(url, token, feat[0])
@@ -423,10 +435,7 @@ def send_to_reveal(token, feat, index, numFeats, action, baseUrl, server):
         url = f'{baseUrl}/opensrp/rest/location/add?is_jurisdiction=true'
         status = api_post_request(url, token, feat)
 
-    if status == 201:
-        print(f'{index + 1}/{numFeats}: Jurisdiction {action}ed successfully on the {server} server for externalId {feat[0]["properties"]["externalId"]}. Status code: {status}')
-    else:
-        print(f'{index + 1}/{numFeats}: There was an issue {action}ing the new jursidiction on the {server} server for externalId {feat[0]["properties"]["externalId"]}. Status code: {status}')
+    return status
 
 
 
@@ -434,7 +443,7 @@ def get_action_and_foci():
     print('\n***************************************************************')
     print('Script to pull foci from bvbdosm and upload them into Reveal')
     print('***************************************************************\n')
-    print('To get started, would you like to upload new foci or edit exiting foci?')
+    print('To get started, would you like to upload new foci or edit exiting foci in Reveal?')
     action = None
     while action is None:
         action = input('(upload/edit): ')
@@ -490,16 +499,17 @@ def get_reveal_gdf(config, action, fociIds, token):
         else:
             inReveal.append(focusId)
     if action == 'edit' and len(notInReveal) > 0:
-        raise ValueError(f'The following foci are not in Reveal yet - did you mean to upload them instead? ({", ".join([str(x) for x in notInReveal])})')
+        raise ValueError(f'The following {len(notInReveal)} foci are not in Reveal yet - did you mean to upload them instead? ({", ".join([str(x) for x in notInReveal])})')
     elif action == 'upload' and len(inReveal) > 0:
-        raise ValueError(f'The following foci are already in Reveal - did you mean to edit them instead? ({", ".join([str(x) for x in inReveal])})')
+        raise ValueError(f'The following {len(inReveal)} foci are already in Reveal - did you mean to edit them instead? ({", ".join([str(x) for x in inReveal])})')
     else:
         return rgdf
 
 def push_changes_to_reveal(config, osmGdf, action, token):
-    pd.set_option('display.max_rows', osmGdf.shape[0]+1)
-    print(osmGdf[['name', 'externalId', 'geographicLevel', 'externalParentId']])
-    print(f'Are you sure you want to push the {osmGdf.shape[0]} {action.upper()}{"S" if osmGdf.shape[0] > 1 else ""} above to Reveal?')
+    pd.set_option('display.max_rows', None)
+    sorted = osmGdf.sort_values(by=['geographicLevel', 'externalId']).reset_index(drop=True)
+    print(sorted[['name', 'externalId', 'geographicLevel', 'externalParentId']])
+    print(f'Are you sure you want to push the {sorted.shape[0]} {action.upper()}{"S" if sorted.shape[0] > 1 else ""} above to Reveal?')
     push = None
     while push == None:
         push = input('(y/n): ')
@@ -513,7 +523,6 @@ def push_changes_to_reveal(config, osmGdf, action, token):
 
         # Save the files so they're uploaded in the correct order for new foci and save temp file so
         # it can be imported as GeoJSON
-        sorted = osmGdf.sort_values(by=['geographicLevel']).reset_index(drop=True)
         geojsonLoc = os.path.join(tempfile.gettempdir(), 'sorted.geojson')
         sorted.to_file(geojsonLoc, driver='GeoJSON')
 
@@ -521,41 +530,82 @@ def push_changes_to_reveal(config, osmGdf, action, token):
         with open(geojsonLoc, encoding='utf8') as f:
             data = geojson.load(f)
 
-        # Get the length of the features to be uploaded
-        numFeats = len(data['features'])
+        featsToUpload = data['features']
+        retry = 'y'
+        uploadedFeats = []
+        while len(featsToUpload) > 0 and retry == 'y':
 
-        # Loop through the features in the GeoJSON file - note that they should be sorted by geographicLevel
-        print('')
-        for index, feat in enumerate(data['features']):
+            # Get the length of the features to be uploaded
+            # numFeats = len(data['features'])
+            numFeats = len(featsToUpload)
 
-            # Switch on the type of operation
-            reveal_feature = []
-            if action == 'upload':
-                reveal_feature = create_reveal_feature(token, feat, baseUrl)
-            elif action == 'edit':
-                reveal_feature = update_reveal_feature_geometry(token, feat, baseUrl)
+            # Loop through the features in the GeoJSON file - note that they should be sorted by geographicLevel
+            print()
+            notUploadedFeats = []
+            # for index, feat in enumerate(data['features']):
+            for index, feat in enumerate(featsToUpload):
 
-            # print(reveal_feature)
+                # Switch on the type of operation
+                reveal_feature = []
+                if action == 'upload':
+                    reveal_feature = create_reveal_feature(token, feat, baseUrl)
+                elif action == 'edit':
+                    reveal_feature = update_reveal_feature_geometry(token, feat, baseUrl)
 
-            # Send the new location and check the status
-            send_to_reveal(token, reveal_feature, index, numFeats, action, baseUrl, 'local')
+                # print(reveal_feature)
 
-            # Sleep to prevent overloading the server
-            sleep(2)
+                # Send the new location and check the status
+                status = send_to_reveal(token, reveal_feature, baseUrl, action)
 
-        # Clean up temp file
-        os.remove(geojsonLoc)
+                if status == 201:
+                    print(f'{index + 1}/{numFeats}: Jurisdiction {action}ed successfully on the server for externalId {reveal_feature[0]["properties"]["externalId"]}. Status code: {status}')
+                    uploadedFeats.append(reveal_feature)
+                else:
+                    print(f'{index + 1}/{numFeats}: There was an issue {action}ing the new jursidiction on the server for externalId {reveal_feature[0]["properties"]["externalId"]}. Status code: {status}')
+                    notUploadedFeats.append(reveal_feature)
+
+                # Sleep to prevent overloading the server
+                # sleep(2)
+
+            # Clean up temp file
+            os.remove(geojsonLoc)
+
+            # Set the features to upload to those not uploaded
+            featsToUpload = notUploadedFeats
+
+            # Prompt user if they would like to retry uploading missed foci
+            if len(notUploadedFeats) > 0:
+                print(f'{len(notUploadedFeats)} {"jurisdictions" if len(notUploadedFeats) > 1 else "jurisdiciton"} were not uploaded, would you like to try uploading again?')
+                internalRetry = None
+                while internalRetry == None:
+                    internalRetry = input('(y/n): ')
+                    if internalRetry not in ['y','n']:
+                        print(f'{internalRetry} is not a valid option, please type either "y" or "n"')
+                        internalRetry = None
+
+                retry = internalRetry
+                if retry == 'n':
+                    print(f'In order to ensure all features have been uploaded, please manually upload the following missed {"jurisdictions" if len(notUploadedFeats) > 1 else "jurisdiciton"}:')
+                    print([{'externalId': notUploadedFeats['properties']['externalId'], 'osmid': notUploadedFeats['properties']['externalId']} for x in notUploadedFeats])
+
+
+
+        # Convert the uploaded features to a feature collection
+        fc = geojson.FeatureCollection(uploadedFeats)
+
+        # Save changes to a GeoJSON in the ./upload folder
+        if not os.path.isdir('./uploads'):
+            os.makedir('./uploads')
+
+        saveFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'uploads', f'{action} {datetime.now().strftime("%Y-%m-%d %H_%M_%S")}.geojson')
+        with open(saveFile, 'w', encoding='utf8') as f:
+            geojson.dump(fc,f, ensure_ascii=False, indent=4)
+
+        # sorted.to_file(saveFile, driver="GeoJSON")
+        print(f'\nGeoJSON of the {action}ed {"jurisdictions have" if len(uploadedFeats) > 1 else "jurisdiction has"} been saved to: {saveFile}')
 
     else:
         print('No foci pushed to Reveal')
-
-
-def saveChanges(osmGdf, action):
-    if not os.path.isdir('./uploads'):
-        os.makedir('./uploads')
-    saveFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'uploads', f'{action} {datetime.now().strftime("%Y-%m-%d %H_%M_%S")}.geojson')
-    osmGdf.to_file(saveFile, driver="GeoJSON")
-    print(f'\nGeoJSON of the {action}ed {"jurisdictions have" if len(osmGdf) > 1 else "jurisdiction has"} been saved to: {saveFile}')
 
 
 def main():
@@ -591,8 +641,6 @@ def main():
     # Upload the changes
     push_changes_to_reveal(config, osmGdf, action, token)
 
-    # Save changes to a GeoJSON in the ./upload folder
-    saveChanges(osmGdf, action)
 
 if __name__ == '__main__':
     main()
