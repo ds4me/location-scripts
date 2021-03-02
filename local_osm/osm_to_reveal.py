@@ -353,14 +353,14 @@ def get_oauth_token(config, server):
 
 def api_get_request(url, token):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
-    r = requests.get(url, headers=headers, timeout=5)
+    r = requests.get(url, headers=headers, timeout=15)
     return r.json()
 
 
 def api_post_request(url, token, json):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
     try:
-        r = requests.post(url, headers=headers, json=json, timeout=5)
+        r = requests.post(url, headers=headers, json=json, timeout=15)
         return r.status_code
     except requests.exception.Timeout:
         return 999
@@ -369,7 +369,7 @@ def api_post_request(url, token, json):
 def api_put_request(url, token, json):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
     try:
-        r = requests.put(url, headers=headers, json=json, timeout=5)
+        r = requests.put(url, headers=headers, json=json, timeout=15)
         return r.status_code
     except requests.exceptions.Timeout:
         return 999
