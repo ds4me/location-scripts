@@ -15,6 +15,7 @@ import tempfile
 from uuid import uuid4
 from datetime import datetime
 from time import sleep
+import collections
 
 '''
     Full upload script for pulling from OSM, validing the foci, and pushing updates to the server
@@ -67,10 +68,13 @@ def get_osm_features(config, action, fociIds):
     filteredOsmFeats = [x for x in fc["features"] if x['properties']['externalId'] in fociIds]
     diff = len(filteredOsmFeats) - len(fociIds)
     if diff > 0:
-        print(f'Entered Foci IDs: {fociIds}, Filtered OSM Features (externalId, osmid): {[(x["properties"]["externalId"], x["properties"]["osmid"]) for x in filteredOsmFeats]}')
+        dupeExternalIds = [x for x, y in collections.Counter([x['properties']['externalId'] for x in filteredOsmFeats]).items() if y > 1]
+        print('Fix the following duplicates in OSM:')
+        print([{'externalId': x['properties']['externalId'], 'osmid': x['properties']['osmid']} for x in filteredOsmFeats if x['properties']['externalId'] in dupeExternalIds])
         raise TypeError(f'There are {diff*2} foci with the same external ID, double check and fix any duplicates on bvbdosm')
     elif diff < 0:
-        print(f'Entered Foci IDs: {fociIds}, Filtered OSM Features (externalId, osmid): {[(x["properties"]["externalId"], x["properties"]["osmid"]) for x in filteredOsmFeats]}')
+        print('The following foci IDs entered cannot be found in OSM:')
+        print([x for x in fociIds if x not in [x['properties']['externalId'] for y in filteredOsmFeats]])
         missingStr = f'There is 1 missing focus' if abs(diff) == 1 else f'There are {abs(diff)} missing foci'
         raise TypeError(f'{missingStr}, please double check that these have been mapped on bvbdosm')
     else:
