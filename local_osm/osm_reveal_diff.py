@@ -11,9 +11,9 @@ print('')
 
 # Load them into memory
 print('Loading hierarchies into memory...')
-reveal = gpd.read_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),'get_reveal_geometry.py'))
+reveal = gpd.read_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),'reveal_features_local.geojson'))
 reveal.externalId = reveal.externalId.astype(np.int64)
-osm = gpd.read_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),'get_geojson.py'))
+osm = gpd.read_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),'bvbdosm.geojson'))
 print('')
 
 # notInReveal = osm[~osm.externalId.isin(reveal.externalId.to_list())]
