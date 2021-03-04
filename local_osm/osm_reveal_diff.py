@@ -50,10 +50,10 @@ pd.set_option('display.max_rows', None)
 print('Duplicate descriptions in bvbdosm:')
 print(pd.DataFrame([{'externalId': x} for x in osmDupes]))
 
-print('\nFoci not in Reveal:')
+print('\nFoci to potentially upload:')
 print(pd.DataFrame(notInReveal))
 
-print('\nFoci to potentially update:')
+print('\nFoci to potentially edit:')
 print(pd.DataFrame(modified))
 
 print('\nDuplicates in Reveal:')
