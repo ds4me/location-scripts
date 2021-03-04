@@ -86,7 +86,7 @@ def main():
 
     saveFile = args.saveFile
     if args.saveFile == None:
-        saveFile = os.path.join(os.path.join(os.path.dirname(os.path.realpath(__file__))),f'reveal_{"features" if args.jurisdiction == "true" else "structures"}_{args.server}.geojson') if args.type == 'geojson' else os.path.join(os.getcwd(),f'reveal_{"features" if args.jurisdiction == "true" else "structures"}_{args.server}.xlsx')
+        saveFile = os.path.join(os.path.dirname(os.path.realpath(__file__)),f'reveal_{"features" if args.jurisdiction == "true" else "structures"}_{args.server}.geojson') if args.type == 'geojson' else os.path.join(os.getcwd(),f'reveal_{"features" if args.jurisdiction == "true" else "structures"}_{args.server}.xlsx')
 
     if check_path(saveFile, args.type):
         # get_geometry = 'true' if args.type == 'geojson' else 'false'

@@ -2,17 +2,18 @@ import geopandas as gpd
 import numpy as np
 import collections
 import subprocess
+import os
 
 # Get the most updated version of the location hierarchies
-subprocess.run(['python', 'C:/Users/elija/Desktop/Work Projects/location-scripts/local_osm/get_geojson.py', '-f'])
-subprocess.run(['python', 'C:/Users/elija/Desktop/Work Projects/location-scripts/local_osm/get_reveal_geometry.py'])
+subprocess.run(['python', os.path.join(os.path.dirname(os.path.realpath(__file__)),'get_geojson.py'), '-f'])
+subprocess.run(['python', os.path.join(os.path.dirname(os.path.realpath(__file__)),'get_reveal_geometry.py')])
 print('')
 
 # Load them into memory
 print('Loading hierarchies into memory...')
-reveal = gpd.read_file('C:/Users/elija/Desktop/Work Projects/location-scripts/local_osm/reveal_features_local.geojson')
+reveal = gpd.read_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),'get_reveal_geometry.py'))
 reveal.externalId = reveal.externalId.astype(np.int64)
-osm = gpd.read_file('C:/Users/elija/Desktop/Work Projects/location-scripts/local_osm/bvbdosm.geojson')
+osm = gpd.read_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),'get_geojson.py'))
 print('')
 
 # notInReveal = osm[~osm.externalId.isin(reveal.externalId.to_list())]
