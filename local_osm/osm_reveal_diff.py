@@ -50,10 +50,10 @@ pd.set_option('display.max_rows', None)
 print('Duplicate descriptions in bvbdosm:')
 print(pd.DataFrame([{'externalId': x} for x in osmDupes]))
 
-print('\nFoci to potentially upload:')
+print('\nFoci to potentially upload (in bvbdosm but not Reveal):')
 print(pd.DataFrame(notInReveal))
 
-print('\nFoci to potentially edit:')
+print('\nFoci to potentially edit (area is either smaller or larger than what is in Reveal):')
 print(pd.DataFrame(modified))
 
 print('\nDuplicates in Reveal:')
