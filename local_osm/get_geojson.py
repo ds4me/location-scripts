@@ -175,7 +175,7 @@ def main():
     parser = argparse.ArgumentParser(description="Script to create geojson by querying way IDs in local OSM server")
     # parser.add_argument('type', choices=["id","bbox"], help="Type of query - id loops through min/max ids, bbox pulls all values from bbox")
     parser.add_argument('-t', '--type', dest='type', choices=['api','id'], default='api', help='Type of query, defaults to api')
-    parser.add_argument('-o', '--output_file', type=path_with_geojson, default=os.path.join(os.getcwd(),"bvbdosm.geojson"), help="Output file location, must end with '.geojson', defaults to 'bvbdosm.geojson'")
+    parser.add_argument('-o', '--output_file', type=path_with_geojson, default=os.path.join(os.path.dirname(os.path.realpath(__file__)),"bvbdosm.geojson"), help="Output file location, must end with '.geojson', defaults to 'bvbdosm.geojson'")
     parser.add_argument('--min', dest="min_id", default="1", help="Minimum way ID to check", type=int)
     parser.add_argument('--max', dest="max_id", default="1000", help="Maximum way ID to check", type=int)
     parser.add_argument('-s', '--source', dest="source_filter", help="Regex string of source values to filter on")
