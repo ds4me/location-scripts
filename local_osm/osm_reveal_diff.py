@@ -18,8 +18,6 @@ print('')
 # notInReveal = osm[~osm.externalId.isin(reveal.externalId.to_list())]
 # print(notInReveal.externalId.to_list())
 
-# print(inButDiffArea)
-
 # Get the number of duplicate IDs in OSM - this should now be zero going forward
 osmDupes = [x for x, y in collections.Counter(osm.externalId.values).items() if y > 1]
 print(f'Duplicate descriptions in bvbdosm:', osmDupes)
