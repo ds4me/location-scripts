@@ -31,13 +31,13 @@ for index, row in osm.iterrows():
     revealMatch = reveal[reveal.externalId == row.externalId]
 
     if len(revealMatch) == 0:
-        notInReveal.append({'externalId': row.externalId})
+        notInReveal.append({'externalId': row.externalId, 'lastEdited': row.last_edit_date, 'lastEditedBy': row.last_edit_user})
 
     elif len(revealMatch) == 1:
         percentCoverage = row.geometry.area / revealMatch.geometry.area.values[0]
         if percentCoverage < .99 or percentCoverage > 1.01:
             # print(f'Difference in area between OSM and Reveal for externalId {row.externalId} = {percentCoverage}')
-            modified.append({'externalId': row.externalId, 'percentAreaMatch': percentCoverage})
+            modified.append({'externalId': row.externalId, 'percentAreaMatch': percentCoverage, 'lastEdited': row.last_edit_date, 'lastEditedBy': row.last_edit_user})
 
     else:
         # print(f'There are {len(revealMatch)} matches for externalId {row.externalId}...')
