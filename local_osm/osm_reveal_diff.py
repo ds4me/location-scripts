@@ -7,6 +7,7 @@ import pandas as pd
 
 # Get the most updated version of the location hierarchies
 subprocess.run(['python', os.path.join(os.path.dirname(os.path.realpath(__file__)),'get_geojson.py'), '-f'])
+print('')
 subprocess.run(['python', os.path.join(os.path.dirname(os.path.realpath(__file__)),'get_reveal_geometry.py')])
 print('')
 
@@ -18,6 +19,8 @@ osm = gpd.read_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),'bv
 
 # notInReveal = osm[~osm.externalId.isin(reveal.externalId.to_list())]
 # print(notInReveal.externalId.to_list())
+
+print('Analyzing differences between the hierarchies...\n')
 
 # Get the number of duplicate IDs in OSM - this should now be zero going forward
 osmDupes = [x for x, y in collections.Counter(osm.externalId.values).items() if y > 1]
@@ -48,13 +51,17 @@ for index, row in osm.iterrows():
 pd.set_option('display.max_rows', None)
 
 print('Duplicate descriptions in bvbdosm:')
-print(pd.DataFrame([{'externalId': x} for x in osmDupes]))
+dupesDf = pd.DataFrame([{'externalId': x} for x in osmDupes])
+print(dupesDf) if len(dupesDf) == 0 else print(dupesDf.sort_values(by=['externalId']).reset_index(drop=True))
 
 print('\nFoci to potentially upload (in bvbdosm but not Reveal):')
-print(pd.DataFrame(notInReveal))
+uploadDf = pd.DataFrame(notInReveal)
+print(uploadDf) if len(uploadDf) == 0 else print(uploadDf.sort_values(by=['lastEdited', 'externalId']).reset_index(drop=True))
 
 print('\nFoci to potentially edit (area is either smaller or larger than what is in Reveal):')
-print(pd.DataFrame(modified))
+editDf = pd.DataFrame(modified)
+print(editDf) if len(editDf) == 0 else print(editDf.sort_values(by=['lastEdited', 'externalId']).reset_index(drop=True))
 
 print('\nDuplicates in Reveal:')
-print(pd.DataFrame(revealDupes))
+revealDupesDf = pd.DataFrame(revealDupes)
+print(revealDupesDf) if len(revealDupesDf) == 0 else print(revealDupesDf.sort_values(by=['externalId']).reset_index(drop=True))
