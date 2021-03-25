@@ -80,7 +80,8 @@ def get_osm_features(config, action, fociIds):
         raise TypeError(f'There are {diff*2} foci with the same external ID, double check and fix any duplicates on bvbdosm')
     elif diff < 0:
         print('The following foci IDs entered cannot be found in OSM:')
-        print([x for x in fociIds if x not in [x['properties']['externalId'] for y in filteredOsmFeats]])
+        filteredFociIds = [x['properties']['externalId'] for x in filteredOsmFeats]
+        print([x for x in fociIds if x not in filteredFociIds])
         missingStr = f'There is 1 missing focus' if abs(diff) == 1 else f'There are {abs(diff)} missing foci'
         raise TypeError(f'{missingStr}, please double check that these have been mapped on bvbdosm')
     else:
