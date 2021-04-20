@@ -38,7 +38,7 @@ def print_hierarchy_details(gdf, name):
 def get_osm_features(config, action, fociIds):
     print(f'\nDownloading all foci from bvbdosm...')
     url = config['local_osm']['url'] + '/api/get_all_ways'
-    r = requests.get(url, timeout=15)
+    r = requests.get(url, timeout=30)
     fc = r.json()
 
     for feature in fc['features']:
@@ -111,7 +111,7 @@ def download_reveal_jurisdictions(token):
         headers = {"Authorization": "Bearer {}".format(token['access_token'])}
 
         # Request from the server
-        r = requests.get(url, headers=headers, timeout=15)
+        r = requests.get(url, headers=headers, timeout=30)
 
         # If there's an error, throw an exception with information
         if(r.status_code != 200):
@@ -354,14 +354,18 @@ def get_oauth_token(config, server):
 
 def api_get_request(url, token):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
-    r = requests.get(url, headers=headers, timeout=15)
+    try:
+        r = requests.get(url, headers=headers, timeout=30)
+        return r.status_code
+    except requests.exception.Timeout:
+        return 999
     return r.json()
 
 
 def api_post_request(url, token, json):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
     try:
-        r = requests.post(url, headers=headers, json=json, timeout=15)
+        r = requests.post(url, headers=headers, json=json, timeout=30)
         return r.status_code
     except requests.exception.Timeout:
         return 999
@@ -370,7 +374,7 @@ def api_post_request(url, token, json):
 def api_put_request(url, token, json):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
     try:
-        r = requests.put(url, headers=headers, json=json, timeout=15)
+        r = requests.put(url, headers=headers, json=json, timeout=30)
         return r.status_code
     except requests.exceptions.Timeout:
         return 999
