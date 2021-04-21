@@ -354,12 +354,11 @@ def get_oauth_token(config, server):
 
 def api_get_request(url, token):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
-    try:
-        r = requests.get(url, headers=headers, timeout=30)
-        return r.status_code
-    except requests.exception.Timeout:
-        return 999
+    # try:
+    r = requests.get(url, headers=headers, timeout=30)
     return r.json()
+    # except requests.exception.Timeout:
+    #     return 999
 
 
 def api_post_request(url, token, json):
@@ -551,23 +550,27 @@ def push_changes_to_reveal(config, osmGdf, action, token):
             for index, feat in enumerate(featsToUpload):
 
                 # Switch on the type of operation
-                reveal_feature = []
-                if action == 'upload':
-                    reveal_feature = create_reveal_feature(token, feat, baseUrl)
-                elif action == 'edit':
-                    reveal_feature = update_reveal_feature_geometry(token, feat, baseUrl)
+                try:
+                    reveal_feature = []
+                    if action == 'upload':
+                        reveal_feature = create_reveal_feature(token, feat, baseUrl)
+                    elif action == 'edit':
+                        reveal_feature = update_reveal_feature_geometry(token, feat, baseUrl)
 
-                # print(reveal_feature)
+                    # print(reveal_feature)
 
-                # Send the new location and check the status
-                status = send_to_reveal(token, reveal_feature, baseUrl, action)
+                    # Send the new location and check the status
+                    status = send_to_reveal(token, reveal_feature, baseUrl, action)
 
-                if status == 201:
-                    print(f'{index + 1}/{numFeats}: Jurisdiction {action}ed successfully on the server for externalId {reveal_feature[0]["properties"]["externalId"]}. Status code: {status}')
-                    uploadedFeats.append(reveal_feature)
-                else:
-                    print(f'{index + 1}/{numFeats}: There was an issue {action}ing the new jursidiction on the server for externalId {reveal_feature[0]["properties"]["externalId"]}. Status code: {status}')
-                    notUploadedFeats.append(reveal_feature)
+                    if status == 201:
+                        print(f'{index + 1}/{numFeats}: Jurisdiction {action}ed successfully on the server for externalId {reveal_feature[0]["properties"]["externalId"]}. Status code: {status}')
+                        uploadedFeats.append(reveal_feature)
+                    else:
+                        print(f'{index + 1}/{numFeats}: There was an issue {action}ing the new jursidiction on the server for externalId {reveal_feature[0]["properties"]["externalId"]}. Status code: {status}')
+                        notUploadedFeats.append(feat)
+                except:
+                    print(f'{index + 1}/{numFeats}: An error occurred while {action}ing the new jurisdiction: {feat["properties"]["externalId"]}')
+                    notUploadedFeats.append(feat)
 
                 # Sleep to prevent overloading the server
                 # sleep(2)
