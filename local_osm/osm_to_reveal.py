@@ -48,8 +48,8 @@ def get_osm_features(config, action, fociIds):
         try:
             id = int(props['description'].strip())
             name = props['name'].strip()
-        except TypeError as e:
-            print(f'OSM ID {feature["id"]} is missing a description or name tag. Please fix directly at https://bvbdosm.herokuapp.com/way/{feature["id"]}')
+        except KeyError as e:
+            print(f'OSM ID {props["osmid"]} is missing a description or name tag. Please fix directly at https://bvbdosm.herokuapp.com/way/{props["osmid"]}')
 
         # Catch descriptions that are less than 10 digits
         if len(str(id)) is not 10:
