@@ -1,6 +1,6 @@
 import configparser
 import os
-import requests
+# import requests
 import re
 import geopandas as gpd
 import numpy as np
@@ -17,6 +17,8 @@ from datetime import datetime
 from time import sleep
 import collections
 from geojson_rewind import rewind
+from retry_requests import retry
+from requests import Session
 
 '''
     Full upload script for pulling from OSM, validing the foci, and pushing updates to the server
@@ -538,7 +540,7 @@ def push_changes_to_reveal(config, osmGdf, action, token):
         for index, f in enumerate(featsToUpload):
 
             # Print the current feature externalId in case an error occurs
-             print(f'{index + 1}/{numFeats}: {action.capitalize()}ing jurisdiction {f["properties"]["externalId"]}...')
+            print(f'{index + 1}/{len(featsToUpload)}: {action.capitalize()}ing jurisdiction {f["properties"]["externalId"]}...')
 
             # Correctly wind the features geometry
             feat = rewind(f)
