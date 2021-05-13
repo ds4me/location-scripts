@@ -16,6 +16,7 @@ from uuid import uuid4
 from datetime import datetime
 from time import sleep
 import collections
+from geojson_rewind import rewind
 
 '''
     Full upload script for pulling from OSM, validing the foci, and pushing updates to the server
@@ -25,6 +26,11 @@ import collections
     2. Run validation, allow user input to add missing hierarchy members, prompt for Thai names for members
     3. Upload
 '''
+
+# Get a session to be used through to ensure requests are retried instead of throwing errors
+retrySession = retry(Session(), retries=10, backoff_factor=0.1)
+
+
 
 def print_hierarchy_details(gdf, name):
     print(f'Loaded {name} with {len(gdf)} features:')
@@ -38,7 +44,7 @@ def print_hierarchy_details(gdf, name):
 def get_osm_features(config, action, fociIds):
     print(f'\nDownloading all foci from bvbdosm...')
     url = config['local_osm']['url'] + '/api/get_all_ways'
-    r = requests.get(url, timeout=30)
+    r = retrySession.get(url, timeout=30)
     fc = r.json()
 
     for feature in fc['features']:
@@ -111,7 +117,7 @@ def download_reveal_jurisdictions(token):
         headers = {"Authorization": "Bearer {}".format(token['access_token'])}
 
         # Request from the server
-        r = requests.get(url, headers=headers, timeout=30)
+        r = retrySession.get(url, headers=headers, timeout=30)
 
         # If there's an error, throw an exception with information
         if(r.status_code != 200):
@@ -354,30 +360,20 @@ def get_oauth_token(config, server):
 
 def api_get_request(url, token):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
-    # try:
-    r = requests.get(url, headers=headers, timeout=30)
+    r = retrySession.get(url, headers=headers, timeout=30)
     return r.json()
-    # except requests.exception.Timeout:
-    #     return 999
 
 
 def api_post_request(url, token, json):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
-    try:
-        r = requests.post(url, headers=headers, json=json, timeout=30)
-        return r.status_code
-    except requests.exception.Timeout:
-        return 999
+    r = retrySession.post(url, headers=headers, json=json, timeout=30)
+    return r.status_code
 
 
 def api_put_request(url, token, json):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
-    try:
-        r = requests.put(url, headers=headers, json=json, timeout=30)
-        return r.status_code
-    except requests.exceptions.Timeout:
-        return 999
-
+    r = retrySession.put(url, headers=headers, json=json, timeout=30)
+    return r.status_code
 
 
 def get_location(token, externalId, baseUrl):
@@ -534,70 +530,110 @@ def push_changes_to_reveal(config, osmGdf, action, token):
         with open(geojsonLoc, encoding='utf8') as f:
             data = geojson.load(f)
 
-        featsToUpload = data['features']
-        retry = 'y'
+        # list of uploaded features to save at the end
         uploadedFeats = []
-        while len(featsToUpload) > 0 and retry == 'y':
 
-            # Get the length of the features to be uploaded
-            # numFeats = len(data['features'])
-            numFeats = len(featsToUpload)
+        # Loop through the features and try to edit/upload them to Reveal
+        featsToUpload = data['features']
+        for index, f in enumerate(featsToUpload):
 
-            # Loop through the features in the GeoJSON file - note that they should be sorted by geographicLevel
-            print()
-            notUploadedFeats = []
-            # for index, feat in enumerate(data['features']):
-            for index, feat in enumerate(featsToUpload):
+            # Print the current feature externalId in case an error occurs
+             print(f'{index + 1}/{numFeats}: {action.capitalize()}ing jurisdiction {f["properties"]["externalId"]}...')
 
-                # Switch on the type of operation
-                try:
-                    reveal_feature = []
-                    if action == 'upload':
-                        reveal_feature = create_reveal_feature(token, feat, baseUrl)
-                    elif action == 'edit':
-                        reveal_feature = update_reveal_feature_geometry(token, feat, baseUrl)
+            # Correctly wind the features geometry
+            feat = rewind(f)
 
-                    # print(reveal_feature)
+            try:
+                # Either create or get the feature with the correct geometry
+                if action == 'upload':
+                    reveal_feature = create_reveal_feature(token, feat, baseUrl)
+                else:
+                    reveal_feature = update_reveal_feature_geometry(token, feat, baseUrl)
 
-                    # Send the new location and check the status
-                    status = send_to_reveal(token, reveal_feature, baseUrl, action)
+                # Submit the change to Reveal
+                status = send_to_reveal(token, reveal_feature, baseUrl, action)
 
-                    if status == 201:
-                        print(f'{index + 1}/{numFeats}: Jurisdiction {action}ed successfully on the server for externalId {reveal_feature[0]["properties"]["externalId"]}. Status code: {status}')
-                        uploadedFeats.append(reveal_feature)
-                    else:
-                        print(f'{index + 1}/{numFeats}: There was an issue {action}ing the new jursidiction on the server for externalId {reveal_feature[0]["properties"]["externalId"]}. Status code: {status}')
-                        notUploadedFeats.append(feat)
-                except:
-                    print(f'{index + 1}/{numFeats}: An error occurred while {action}ing the new jurisdiction: {feat["properties"]["externalId"]}')
-                    notUploadedFeats.append(feat)
+                # Add to saved list
+                uploadedFeats.append(reveal_feature)
 
-                # Sleep to prevent overloading the server
-                # sleep(2)
+            except:
+                # Catch all exceptions, break the for loop and save what was uploaded
+                print(f'An error occurred... please try to re-edit/upload the foci after the last successful upload. The sorted foci used for uploading can be found here: {geojsonLoc}')
+                break
 
-            # Clean up temp file
-            os.remove(geojsonLoc)
 
-            # Set the features to upload to those not uploaded
-            featsToUpload = notUploadedFeats
-
-            # Prompt user if they would like to retry uploading missed foci
-            if len(notUploadedFeats) > 0:
-                print(f'{len(notUploadedFeats)} {"jurisdictions" if len(notUploadedFeats) > 1 else "jurisdiciton"} were not uploaded, would you like to try uploading again?')
-                internalRetry = None
-                while internalRetry == None:
-                    internalRetry = input('(y/n): ')
-                    if internalRetry not in ['y','n']:
-                        print(f'{internalRetry} is not a valid option, please type either "y" or "n"')
-                        internalRetry = None
-
-                retry = internalRetry
-                if retry == 'n':
-                    print(f'In order to ensure all features have been uploaded, please manually upload the following missed {"jurisdictions" if len(notUploadedFeats) > 1 else "jurisdiciton"}:')
-                    print([{'externalId': notUploadedFeats['properties']['externalId'], 'osmid': notUploadedFeats['properties']['externalId']} for x in notUploadedFeats])
+        # Clean up temp file
+        os.remove(geojsonLoc)
 
 
 
+
+        # retry = 'y'
+        # uploadedFeats = []
+        # while len(featsToUpload) > 0 and retry == 'y':
+        #
+        #     # Get the length of the features to be uploaded
+        #     # numFeats = len(data['features'])
+        #     numFeats = len(featsToUpload)
+        #
+        #     # Loop through the features in the GeoJSON file - note that they should be sorted by geographicLevel
+        #     print()
+        #     notUploadedFeats = []
+        #     # for index, feat in enumerate(data['features']):
+        #     for index, f in enumerate(featsToUpload):
+        #
+        #         # Rewind the features to respect the right-hand rule
+        #         feat = rewind(f)
+        #
+        #         # Switch on the type of operation
+        #         try:
+        #             reveal_feature = []
+        #             if action == 'upload':
+        #                 reveal_feature = create_reveal_feature(token, feat, baseUrl)
+        #             elif action == 'edit':
+        #                 reveal_feature = update_reveal_feature_geometry(token, feat, baseUrl)
+        #
+        #             # print(reveal_feature)
+        #
+        #             # Send the new location and check the status
+        #             status = send_to_reveal(token, reveal_feature, baseUrl, action)
+        #
+        #             if status == 201:
+        #                 print(f'{index + 1}/{numFeats}: Jurisdiction {action}ed successfully on the server for externalId {reveal_feature[0]["properties"]["externalId"]}. Status code: {status}')
+        #                 uploadedFeats.append(reveal_feature)
+        #             else:
+        #                 print(f'{index + 1}/{numFeats}: There was an issue {action}ing the new jursidiction on the server for externalId {reveal_feature[0]["properties"]["externalId"]}. Status code: {status}')
+        #                 notUploadedFeats.append(feat)
+        #         except:
+        #             print(f'{index + 1}/{numFeats}: An error occurred while {action}ing the new jurisdiction: {feat["properties"]["externalId"]}')
+        #             notUploadedFeats.append(feat)
+        #
+        #         # Sleep to prevent overloading the server
+        #         # sleep(2)
+        #
+        #     # Clean up temp file
+        #     os.remove(geojsonLoc)
+        #
+        #     # Set the features to upload to those not uploaded
+        #     featsToUpload = notUploadedFeats
+        #
+        #     # Prompt user if they would like to retry uploading missed foci
+        #     if len(notUploadedFeats) > 0:
+        #         print(f'{len(notUploadedFeats)} {"jurisdictions" if len(notUploadedFeats) > 1 else "jurisdiciton"} were not uploaded, would you like to try uploading again?')
+        #         internalRetry = None
+        #         while internalRetry == None:
+        #             internalRetry = input('(y/n): ')
+        #             if internalRetry not in ['y','n']:
+        #                 print(f'{internalRetry} is not a valid option, please type either "y" or "n"')
+        #                 internalRetry = None
+        #
+        #         retry = internalRetry
+        #         if retry == 'n':
+        #             print(f'In order to ensure all features have been uploaded, please manually upload the following missed {"jurisdictions" if len(notUploadedFeats) > 1 else "jurisdiciton"}:')
+        #             print([{'externalId': notUploadedFeats['properties']['externalId'], 'osmid': notUploadedFeats['properties']['externalId']} for x in notUploadedFeats])
+        #
+        #
+        #
         # Convert the uploaded features to a feature collection
         fc = geojson.FeatureCollection(uploadedFeats)
 
