@@ -641,7 +641,7 @@ def push_changes_to_reveal(config, osmGdf, action, token):
 
         # Save changes to a GeoJSON in the ./upload folder
         if not os.path.isdir('./uploads'):
-            os.makedir('./uploads')
+            os.mkdir('./uploads')
 
         saveFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'uploads', f'{action} {datetime.now().strftime("%Y-%m-%d %H_%M_%S")}.geojson')
         with open(saveFile, 'w', encoding='utf8') as f:
