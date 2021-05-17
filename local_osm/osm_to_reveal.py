@@ -542,8 +542,8 @@ def push_changes_to_reveal(config, osmGdf, action, token):
             # Print the current feature externalId in case an error occurs
             print(f'{index + 1}/{len(featsToUpload)}: {action.capitalize()}ing jurisdiction {f["properties"]["externalId"]}...')
 
-            # Correctly wind the features geometry
-            feat = rewind(f)
+            # Correctly wind the features geometry (if it has geometry)
+            feat = rewind(f) if f['geometry'] != None else f
 
             try:
                 # Either create or get the feature with the correct geometry
