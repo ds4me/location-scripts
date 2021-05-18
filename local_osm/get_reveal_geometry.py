@@ -1,6 +1,5 @@
 import json
 import pandas as pd
-import requests
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import LegacyApplicationClient
 import geojson
@@ -8,6 +7,11 @@ import argparse
 import os
 import configparser
 from time import sleep
+from retry_requests import retry
+from requests import Session
+
+# Get a session to be used through to ensure requests are retried instead of throwing errors
+retrySession = retry(Session(), retries=10, backoff_factor=0.1)
 
 
 def get_oauth_token(server):
@@ -24,7 +28,7 @@ def get_oauth_token(server):
 
 def api_get_request(url, token):
     headers = {"Authorization": "Bearer {}".format(token['access_token'])}
-    r = requests.get(url, headers=headers)
+    r = retrySession.get(url, headers=headers)
     if(r.status_code != 200):
         raise Exception(f'The following error occurred getting locations from {url}: {r.text}')
     else:
@@ -46,7 +50,7 @@ def get_locations(geometry, server, jurisdiction):
         url = url = f'{baseUrl}/opensrp/rest/location/getAll?is_jurisdiction={jurisdiction}&serverVersion={serverVersion}&limit={limit}&return_geometry={geometry}'
         locations = api_get_request(url, token)
         # print(f'Num plans returned: {len(locations)}')
-        sleep(5)
+        # sleep(5)
         if len(locations) == limit:
             serverVersion = locations[len(locations)-1]['serverVersion']
             [allLocations.append(l) for l in locations[0:len(locations)-1]]
