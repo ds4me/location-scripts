@@ -4,6 +4,7 @@ import collections
 import subprocess
 import os
 import pandas as pd
+from datetime import datetime
 
 # Get the most updated version of the location hierarchies
 subprocess.run(['python', os.path.join(os.path.dirname(os.path.realpath(__file__)),'get_geojson.py'), '-f'])
@@ -34,13 +35,13 @@ for index, row in osm.iterrows():
     revealMatch = reveal[reveal.externalId == row.externalId]
 
     if len(revealMatch) == 0:
-        notInReveal.append({'wayId': row.osmid, 'externalId': row.externalId, 'lastEdited': row.last_edit_date, 'lastEditedBy': row.last_edit_user})
+        notInReveal.append({'wayId': row.osmid, 'externalId': row.externalId, 'lastEdited': datetime.strptime(row.last_edit_date, '%Y-%m-%dT%H:%M:%S'), 'lastEditedBy': row.last_edit_user})
 
     elif len(revealMatch) == 1:
         percentCoverage = row.geometry.area / revealMatch.geometry.area.values[0]
         if percentCoverage < .99 or percentCoverage > 1.01:
             # print(f'Difference in area between OSM and Reveal for externalId {row.externalId} = {percentCoverage}')
-            modified.append({'wayId': row.osmid, 'externalId': row.externalId, 'percentAreaMatch': f'{round(percentCoverage * 100, 2)}%', 'lastEdited': row.last_edit_date, 'lastEditedBy': row.last_edit_user})
+            modified.append({'wayId': row.osmid, 'externalId': row.externalId, 'percentAreaMatch': f'{round(percentCoverage * 100, 2)}%', 'lastEdited': datetime.strptime(row.last_edit_date, '%Y-%m-%dT%H:%M:%S'), 'lastEditedBy': row.last_edit_user})
 
     else:
         # print(f'There are {len(revealMatch)} matches for externalId {row.externalId}...')
