@@ -52,12 +52,21 @@ def get_osm_features(config, action, fociIds):
     for feature in fc['features']:
         props = feature['properties']
 
-        # Try to get the description and name, but throw an error if the focus is missing these tags in OSM
+        # Check for empty properties
+        if props == None:
+            raise TypeError(f'A focus around the following coordinates was not mapped correctly in OSM. Please fix before trying again: {feature["geometry"]["coordinates"][0][0]}')
+
+        # Check for empty descriptions
         try:
             id = int(props['description'].strip())
+        except KeyError as e:
+            print(f'OSM ID {props["osmid"]} is missing a description tag. Please fix directly at https://bvbdosm.herokuapp.com/way/{props["osmid"]}')
+
+        # Check for empty names
+        try:
             name = props['name'].strip()
         except KeyError as e:
-            print(f'OSM ID {props["osmid"]} is missing a description or name tag. Please fix directly at https://bvbdosm.herokuapp.com/way/{props["osmid"]}')
+            print(f'OSM ID {props["osmid"]} is missing a name tag. Please fix directly at https://bvbdosm.herokuapp.com/way/{props["osmid"]}')
 
         # Catch descriptions that are less than 10 digits
         if len(str(id)) is not 10:

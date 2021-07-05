@@ -1,0 +1,64 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        [
+            {
+                "type": "Feature",
+                "id": "99c85336-f06d-44d3-8845-49b02e1b5688",
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [
+                                101.669415,
+                                13.122443
+                            ],
+                            [
+                                101.670037,
+                                13.126706
+                            ],
+                            [
+                                101.670616,
+                                13.135211
+                            ],
+                            [
+                                101.666046,
+                                13.143026
+                            ],
+                            [
+                                101.654587,
+                                13.137112
+                            ],
+                            [
+                                101.660724,
+                                13.121272
+                            ],
+                            [
+                                101.669415,
+                                13.122443
+                            ]
+                        ]
+                    ]
+                },
+                "properties": {
+                    "status": "Active",
+                    "parentId": "8b7c1c78-2390-469e-82e0-a9da64c26a0a",
+                    "name": "เขาช่องลม (2107020802)",
+                    "geographicLevel": 5,
+                    "version": 1,
+                    "OpenMRS_Id": "3327cd6d-20c4-4703-86d4-b74c5cc5a82d",
+                    "externalId": "2107020802",
+                    "fi_classification": "B1",
+                    "name_en": " (2107020802)"
+                },
+                "serverVersion": 1601625053222,
+                "locationTags": [
+                    {
+                        "id": 2,
+                        "name": "Operational Area"
+                    }
+                ]
+            }
+        ]
+    ]
+}
