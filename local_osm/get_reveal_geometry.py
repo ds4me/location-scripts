@@ -6,13 +6,11 @@ import geojson
 import argparse
 import os
 import configparser
-from time import sleep
 from retry_requests import retry
 from requests import Session
 
 # Get a session to be used through to ensure requests are retried instead of throwing errors
 retrySession = retry(Session(), retries=10, backoff_factor=0.1)
-
 
 def get_oauth_token(server):
     config = configparser.ConfigParser()
