@@ -148,7 +148,7 @@ def format_for_upload(fc):
     for feature in fc['features']:
         props = feature['properties']
         id = int(props['description'].strip())
-        if len(str(id)) is not 10:
+        if len(str(id)) != 10:
             raise TypeError(f'The description tag for this way is not a 10-digit code: {props}')
         props['externalId'] = id
         props['geographicLevel'] = 5
