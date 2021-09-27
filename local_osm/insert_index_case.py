@@ -135,11 +135,14 @@ def main():
 
         print(sql)
 
-        # res = previewConn.execute(sql)
-        # if res != None:
-        #     print(f'Index case {indexId} inserted successfully')
-        # else:
-        #     print(f'Issue inserting index case {indexId}!')
+        #  Insert the index case
+        res = previewConn.execute(sql)
+
+        # Print the results
+        if res != None:
+            print(f'Index case {indexId} inserted successfully')
+        else:
+            print(f'Issue inserting index case {indexId}!')
 
     # Close the connection
     previewConn.close()
