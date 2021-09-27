@@ -9,7 +9,6 @@ import os
 
 
 def getCaseClass(siteId, sourceId):
-    
     if siteId == sourceId or siteId[0:8] == sourceId[0:8]:
         return 'A'
     elif siteId[0:6] == sourceId[0:6]:
@@ -20,17 +19,6 @@ def getCaseClass(siteId, sourceId):
         return 'Bz'
     else: 
         return 'Bo'
-
-
-# TODO: Check this logic once plan generation is fixed in preview
-# def getSource(insertType, locations, site):
-#     if insertType == 'active':
-#         return site
-#     else:
-#         if random.random() > .5:
-#             return site
-#         else:
-#             return locations.sample()
 
 
 def main():
