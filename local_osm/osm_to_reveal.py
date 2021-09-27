@@ -69,7 +69,7 @@ def get_osm_features(config, action, fociIds):
             print(f'OSM ID {props["osmid"]} is missing a name tag. Please fix directly at https://bvbdosm.herokuapp.com/way/{props["osmid"]}')
 
         # Catch descriptions that are less than 10 digits
-        if len(str(id)) is not 10:
+        if len(str(id)) != 10:
             raise TypeError(f'The description tag for the OSM way {feature["id"]} is not a 10-digit code: {props}. Please fix directly at https://bvbdosm.herokuapp.com/way/{feature["id"]}')
 
         # Set the necessary props
@@ -163,7 +163,8 @@ def check_size(gdf, min_area, max_area):
     print(f'\nChecking foci that are smaller than {round(min_area)}m^2 or larger than {round(max_area/1000000)}km^2...')
 
     # Convert the CRS to measure size in meters
-    if gdf.crs is not "EPSG:3857": gdf = gdf.to_crs("EPSG:3857")
+    if gdf.crs != "EPSG:3857": 
+        gdf = gdf.to_crs("EPSG:3857")
 
     # Get just the foci
     justFoci = gdf.loc[(gdf.geographicLevel.astype(str) == '5')]
