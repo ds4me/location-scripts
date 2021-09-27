@@ -91,6 +91,7 @@ def main():
         age = random.randint(1, 100)
         species = random.choice(species)
 
+        # Generate the SQL, note that "investigtion_date" is not a typo
         sql = f"""insert into index_case (
             case_id,
             p_site_id,
