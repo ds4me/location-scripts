@@ -68,6 +68,7 @@ def main():
         if r.status_code == 200:
             assignments = [x['organizationId'] for x in r.json()]
             namedAssignments = [orgs[orgs['identifier'] == x].name.values[0] for x in assignments]
+            namedAssignments = sorted(namedAssignments, key=str.casefold, reverse=True)
             apiAssign.append({
                 'identifier': row.identifier, 
                 'assignments': namedAssignments
