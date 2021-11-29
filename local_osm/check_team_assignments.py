@@ -38,6 +38,24 @@ def print_same_line(output):
     sys.stdout.flush()
 
 
+def retrySave(df, saveLocation):
+    try:
+        df.to_excel(saveLocation)
+        print(f'{len(df)} team assignment issues found! For details see the following file: {saveLocation}')
+    except PermissionError:
+        print('The file appears to be open on your computer. Close it and try again?')
+        retry = None
+        while retry == None:
+            retry = input('(y/n): ')
+            if retry not in ['y','n']:
+                print(f'{retry} is not a valid option, please type either "y" or "n"')
+                retry = None
+        if retry == 'y':
+            retrySave(df,saveLocation)
+        else:
+            print('Exited without saving')
+
+
 def main():
     # Load the config file and get the Oauth2 token
     config = configparser.ConfigParser()
@@ -77,9 +95,11 @@ def main():
             # Reorganize SQL query data to match apiAssign array above
             correctAssign.append({
                 'identifier': row.identifier, 
+                'title': row.title,
                 'date': row.dateCreated, 
                 'status': row.status, 
                 'jurisdiction': row.jurisdiction,
+                'externalId': row.externalId,
                 'effectivePeriod_start': row.effectivePeriod_start,
                 'effectivePeriod_end': row.effectivePeriod_end,
                 'assignments': [x for x in [
@@ -116,8 +136,10 @@ def main():
             issues.append({
                 'date': p.date, 
                 'identifier': p.identifier, 
+                'title': p.title,
                 'status': p.status, 
                 'jurisdiction': p.jurisdiction,
+                'externalId': p.externalId,
                 'effectivePeriod_start': p.effectivePeriod_start,
                 'effectivePeriod_end': p.effectivePeriod_end,
                 'correct': correctTeams, 
@@ -127,8 +149,7 @@ def main():
 
     issuesDf = pd.DataFrame(issues)
     saveLocation = os.path.join(os.path.dirname(os.path.realpath(__file__)),'team_assignment_issues.xlsx')
-    print(f'{len(issuesDf)} team assignment issues found! For details see the following file: {saveLocation}')
-    issuesDf.to_excel(saveLocation)
+    retrySave(issuesDf, saveLocation)
 
 
 if __name__ == "__main__":
