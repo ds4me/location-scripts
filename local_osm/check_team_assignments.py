@@ -67,10 +67,12 @@ def main():
 
     # Read in the excel file with the plans and correct team assignments
     # reveal = pd.read_excel('./plans_and_assignments.xlsx') # From here: http://66.228.52.243:3000/question/451-correct-team-assignments-by-plan
+    print('Getting plans from Metabase...')
     revealUrl = 'http://66.228.52.243:3000/public/question/0b22d3f7-1c77-4a41-9f45-6e21726253d8.json'
     reveal = get_request(revealUrl)
 
     # # Get the current organizations from the API
+    print('Getting organizations from OpenSRP...')
     orgUrl = 'https://servermhealth.ddc.moph.go.th/opensrp/rest/organization'
     orgs = get_request(orgUrl, revealHeaders)
 
