@@ -1,6 +1,6 @@
 # Setting up Metabase to work with the Thai VPN
 ## Configuring the VPN
-First, create a docker network that the VPN and Metabase will share:
+First, create a docker network that the VPN and Metabase will share :
 ```console
 docker network create --subnet=172.20.0.0/16 fortinet
 ```
