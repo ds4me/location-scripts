@@ -51,8 +51,7 @@ Below are a few commands that may come in handy if Metabase is already set up or
 docker run -d -p 3000:3000 --restart unless-stopped --net fortinet \
   -v ~/metabase-data:/metabase-data \
   -e "MB_DB_FILE=/metabase-data/metabase.db" \
-  --name metabase \
-  metabase/metabase
+  --name metabase metabase/metabase
 ```
 ## Migrating Metabase H2 database to PostgreSQL
 I wasn't able to get the migration script detailed [here](https://www.metabase.com/docs/latest/operations-guide/running-metabase-on-docker.html) to work due to issues linking the H2 file in the new docker container. Instead I started a new detached Metabase container as follows:
