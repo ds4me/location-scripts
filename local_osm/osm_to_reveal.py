@@ -54,7 +54,10 @@ def get_osm_features(config, action, fociIds):
 
         # Check for empty properties
         if props == None:
-            raise TypeError(f'A focus around the following coordinates was not mapped correctly in OSM. Please fix before trying again: {feature["geometry"]["coordinates"][0][0]}')
+            # OSM takes geometry in a flipped orientation from GeoJSON when searching - flip them to ensure that users can directly copy/paste the coords in bvbdosm
+            coords = feature["geometry"]["coordinates"][0][0]
+            flippedCoords = coords[::-1]
+            raise TypeError(f'A focus around the following coordinates was not mapped correctly in OSM. Please fix before trying again: {flippedCoords}')
 
         # Check for empty descriptions
         try:
