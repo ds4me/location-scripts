@@ -1,3 +1,4 @@
+from operator import index
 import pandas as pd
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import LegacyApplicationClient
@@ -8,6 +9,9 @@ import os
 import collections
 from datetime import datetime
 import sys
+import numpy as np
+from datetime import date
+
 
 # Create the requests session with retries and backoff
 retrySession = retry(Session(), retries=10, backoff_factor=0.1)
@@ -40,7 +44,7 @@ def print_same_line(output):
 
 def retrySave(df, saveLocation):
     try:
-        df.to_excel(saveLocation)
+        df.to_excel(saveLocation, index=False)
         print(f'{len(df)} team assignment issues found! For details see the following file: {saveLocation}')
     except PermissionError:
         print('The file appears to be open on your computer. Close it and try again?')
@@ -146,12 +150,53 @@ def main():
                 'effectivePeriod_end': p.effectivePeriod_end,
                 'correct': correctTeams, 
                 'api': apiTeams, 
-                'link': p.link
+                'link': p.link,
+                'dateIssueDetected': date.today(),
+                'fixed': False
             })
 
+
+    # Create a dataframe with the issues
     issuesDf = pd.DataFrame(issues)
+
+    # Get the location the Excel file will be saved
     saveLocation = os.path.join(os.path.dirname(os.path.realpath(__file__)),'team_assignment_issues.xlsx')
-    retrySave(issuesDf, saveLocation)
+
+    # If there is a previously run version the Excel...
+    if os.path.exists(saveLocation):
+
+        # Load the old version and drop the 
+        oldIssuesDf = pd.read_excel(saveLocation)
+
+        # Merge the dataframes to see where the overlaps exists
+        merged = pd.merge(oldIssuesDf, issuesDf, on='identifier', how='outer', indicator=True)
+
+        # Fixed - not in the new list
+        fixedIssueIds = merged.loc[merged._merge == 'left_only', 'identifier'].to_list()
+        print(f'Issues fixed since last run: {len(fixedIssueIds)}')
+        oldIssuesDf.loc[merged.identifier.isin(fixedIssueIds), 'fixed'] = True
+
+        # New - not in the old list
+        newIssueIds = merged.loc[merged._merge == 'right_only', 'identifier'].to_list()
+        print(f'New issues since last run: {len(newIssueIds)}')
+        newIssues = issuesDf.loc[issuesDf['identifier'].isin(newIssueIds)]
+
+        # Both - update status if it has changed by concating new rows and dropping old duplicates
+        bothIssueIds = merged.loc[merged._merge == 'both', 'identifier'].to_list()
+        duplicateIssuesDf = pd.concat([oldIssuesDf, issuesDf.loc[issuesDf.identifier.isin(bothIssueIds)]], ignore_index=True)
+        duplicateIssuesDf.drop_duplicates(['identifier'], keep='last', inplace=True)
+
+        # Join the old and new issue dataframes and sort by the date the issue was detected
+        final = pd.concat([duplicateIssuesDf, newIssues], ignore_index=True)
+        final.sort_values(by='dateIssueDetected', ascending=False, inplace=True)
+
+        # Save the updated dataframe
+        retrySave(final, saveLocation)
+    
+    else:
+
+        # Save the new dataframe
+        retrySave(issuesDf, saveLocation)
 
 
 if __name__ == "__main__":
