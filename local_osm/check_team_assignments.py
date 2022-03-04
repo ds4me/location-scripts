@@ -165,10 +165,10 @@ def main():
     # If there is a previously run version the Excel...
     if os.path.exists(saveLocation):
 
-        # Load the old version and drop the 
+        # Load the most recently fetched version of issues
         oldIssuesDf = pd.read_excel(saveLocation)
 
-        # Merge the dataframes to see where the overlaps exists
+        # Merge the dataframes to see where the overlaps exist
         merged = pd.merge(oldIssuesDf, issuesDf, on='identifier', how='outer', indicator=True)
 
         # Fixed - not in the new list
