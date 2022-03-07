@@ -152,7 +152,7 @@ def main():
                 'correct': correctTeams, 
                 'api': apiTeams, 
                 'link': p.link,
-                'dateIssueDetected': current_datetime
+                'dateIssueDetected': current_datetime,
                 'fixed': False
             })
 
