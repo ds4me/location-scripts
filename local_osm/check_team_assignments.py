@@ -133,8 +133,9 @@ def main():
     # For example, [odpc_2, odpc_2, bvbd_mhealth] == [odpc_2, bvbd_mhealth]
     compare = lambda x, y: set(x) == set(y)
 
-    # Loop through the corrected items - 
+    # Loop through the corrected items to find any issues between the "correct" and "api" arrays
     issues = []
+    current_datetime = datetime.now()
     for index,p in correctDf.iterrows():
         correctTeams = p.assignments
         apiTeams = apiDf[apiDf.identifier == p.identifier].assignments.values[0]
@@ -151,7 +152,7 @@ def main():
                 'correct': correctTeams, 
                 'api': apiTeams, 
                 'link': p.link,
-                'dateIssueDetected': datetime.now(),
+                'dateIssueDetected': current_datetime
                 'fixed': False
             })
 
