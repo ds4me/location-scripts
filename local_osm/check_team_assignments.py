@@ -10,7 +10,7 @@ import collections
 from datetime import datetime
 import sys
 import numpy as np
-from datetime import date
+from sqlalchemy import asc
 
 
 # Create the requests session with retries and backoff
@@ -151,7 +151,7 @@ def main():
                 'correct': correctTeams, 
                 'api': apiTeams, 
                 'link': p.link,
-                'dateIssueDetected': date.today(),
+                'dateIssueDetected': datetime.now(),
                 'fixed': False
             })
 
@@ -171,29 +171,52 @@ def main():
         # Merge the dataframes to see where the overlaps exist
         merged = pd.merge(oldIssuesDf, issuesDf, on='identifier', how='outer', indicator=True)
 
-        # Fixed - not in the new list
-        fixedIssueIds = merged.loc[merged._merge == 'left_only', 'identifier'].to_list()
-        print(f'Issues fixed since last run: {len(fixedIssueIds)}')
-        oldIssuesDf.loc[merged.identifier.isin(fixedIssueIds), 'fixed'] = True
+        # Print some summary statistics about the newly pulled data
+        print(f'Fixed issues since last run: {len(merged[merged._merge == "left_only"])}')
+        print(f'New issues since last run: {len(merged[merged._merge == "right_only"])}')
 
-        # New - not in the old list
-        newIssueIds = merged.loc[merged._merge == 'right_only', 'identifier'].to_list()
-        print(f'New issues since last run: {len(newIssueIds)}')
-        newIssues = issuesDf.loc[issuesDf['identifier'].isin(newIssueIds)]
+        # Set the fixed value to true - use fixed_x to ensure it won't be overwritten in the loop below
+        merged.loc[merged._merge == 'left_only', 'fixed_x'] = True
 
-        # Both - update status if it has changed by concating new rows and dropping old duplicates
-        bothIssueIds = merged.loc[merged._merge == 'both', 'identifier'].to_list()
-        duplicateIssuesDf = pd.concat([oldIssuesDf, issuesDf.loc[issuesDf.identifier.isin(bothIssueIds)]], ignore_index=True)
-        duplicateIssuesDf.drop_duplicates(['identifier'], keep='last', inplace=True)
+        # Loop through all the _x columns
+        for x_col_name in ['date_x', 'title_x', 'status_x', 'jurisdiction_x', 'externalId_x', 'effectivePeriod_start_x', 'effectivePeriod_end_x', 'correct_x', 'api_x', 'link_x', 'dateIssueDetected_x', 'fixed_x']:
+            
+            # Get the column names
+            plain_col_name = x_col_name.rsplit('_',1)[0]
+            y_col_name = plain_col_name + '_y'
 
-        # Join the old and new issue dataframes and sort by the date the issue was detected
-        final = pd.concat([duplicateIssuesDf, newIssues], ignore_index=True)
-        final.sort_values(by='dateIssueDetected', ascending=False, inplace=True)
+            # Change all the dates to datetime64 for easy sorting in Excel
+            if plain_col_name in ['date', 'effectivePeriod_start', 'effectivePeriod_end', 'dateIssueDetected']:
+                merged[x_col_name] = merged[x_col_name].astype('datetime64')
+                merged[y_col_name] = merged[y_col_name].astype('datetime64')
+
+
+            # For the status and api columns, always take the new value over the old one so they're up-to-date
+            # For non-status columns, always take the old value over the new one
+            if plain_col_name in ('status', 'api'):
+                merged[x_col_name] = merged[y_col_name].fillna(merged[x_col_name])
+            else:
+                merged[x_col_name] = merged[x_col_name].fillna(merged[y_col_name])
+
+            # Drop all the _y columns
+            merged.drop([y_col_name], inplace=True, axis=1)
+
+            # Rename all the _x columns by removing the _x
+            merged.rename(columns={x_col_name: plain_col_name}, inplace=True)
+        
+        # Drop the _merge column
+        merged.drop(['_merge'], inplace=True, axis=1)
+
+        # Sort the final result according to when the issue was detected and the date, descending
+        merged.sort_values(by=['dateIssueDetected', 'date'], ascending=False, inplace=True)
 
         # Save the updated dataframe
-        retrySave(final, saveLocation)
+        retrySave(merged, saveLocation)
     
     else:
+
+        # Sort by date descending
+        issuesDf.sort_values(by='date', ascending=False, inplace=True)
 
         # Save the new dataframe
         retrySave(issuesDf, saveLocation)
