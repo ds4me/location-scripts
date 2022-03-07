@@ -10,7 +10,7 @@ import collections
 from datetime import datetime
 import sys
 import numpy as np
-from sqlalchemy import asc 
+from sqlalchemy import asc
 
 
 # Create the requests session with retries and backoff
