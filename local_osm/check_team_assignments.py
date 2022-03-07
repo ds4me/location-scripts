@@ -1,3 +1,4 @@
+from operator import index
 import pandas as pd
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import LegacyApplicationClient
@@ -8,6 +9,9 @@ import os
 import collections
 from datetime import datetime
 import sys
+import numpy as np
+from sqlalchemy import asc 
+
 
 # Create the requests session with retries and backoff
 retrySession = retry(Session(), retries=10, backoff_factor=0.1)
@@ -40,7 +44,7 @@ def print_same_line(output):
 
 def retrySave(df, saveLocation):
     try:
-        df.to_excel(saveLocation)
+        df.to_excel(saveLocation, index=False)
         print(f'{len(df)} team assignment issues found! For details see the following file: {saveLocation}')
     except PermissionError:
         print('The file appears to be open on your computer. Close it and try again?')
@@ -129,8 +133,9 @@ def main():
     # For example, [odpc_2, odpc_2, bvbd_mhealth] == [odpc_2, bvbd_mhealth]
     compare = lambda x, y: set(x) == set(y)
 
-    # Loop through the corrected items - 
+    # Loop through the corrected items to find any issues between the "correct" and "api" arrays
     issues = []
+    current_datetime = datetime.now()
     for index,p in correctDf.iterrows():
         correctTeams = p.assignments
         apiTeams = apiDf[apiDf.identifier == p.identifier].assignments.values[0]
@@ -146,12 +151,76 @@ def main():
                 'effectivePeriod_end': p.effectivePeriod_end,
                 'correct': correctTeams, 
                 'api': apiTeams, 
-                'link': p.link
+                'link': p.link,
+                'dateIssueDetected': current_datetime,
+                'fixed': False
             })
 
+
+    # Create a dataframe with the issues
     issuesDf = pd.DataFrame(issues)
+
+    # Get the location the Excel file will be saved
     saveLocation = os.path.join(os.path.dirname(os.path.realpath(__file__)),'team_assignment_issues.xlsx')
-    retrySave(issuesDf, saveLocation)
+
+    # If there is a previously run version the Excel...
+    if os.path.exists(saveLocation):
+
+        # Load the most recently fetched version of issues
+        oldIssuesDf = pd.read_excel(saveLocation)
+
+        # Merge the dataframes to see where the overlaps exist
+        merged = pd.merge(oldIssuesDf, issuesDf, on='identifier', how='outer', indicator=True)
+
+        # Print some summary statistics about the newly pulled data
+        print(f'Fixed issues since last run: {len(merged[merged._merge == "left_only"])}')
+        print(f'New issues since last run: {len(merged[merged._merge == "right_only"])}')
+
+        # Set the fixed value to true - use fixed_x to ensure it won't be overwritten in the loop below
+        merged.loc[merged._merge == 'left_only', 'fixed_x'] = True
+
+        # Loop through all the _x columns
+        for x_col_name in ['date_x', 'title_x', 'status_x', 'jurisdiction_x', 'externalId_x', 'effectivePeriod_start_x', 'effectivePeriod_end_x', 'correct_x', 'api_x', 'link_x', 'dateIssueDetected_x', 'fixed_x']:
+            
+            # Get the column names
+            plain_col_name = x_col_name.rsplit('_',1)[0]
+            y_col_name = plain_col_name + '_y'
+
+            # Change all the dates to datetime64 for easy sorting in Excel
+            if plain_col_name in ['date', 'effectivePeriod_start', 'effectivePeriod_end', 'dateIssueDetected']:
+                merged[x_col_name] = merged[x_col_name].astype('datetime64')
+                merged[y_col_name] = merged[y_col_name].astype('datetime64')
+
+
+            # For the status and api columns, always take the new value over the old one so they're up-to-date
+            # For non-status columns, always take the old value over the new one
+            if plain_col_name in ('status', 'api'):
+                merged[x_col_name] = merged[y_col_name].fillna(merged[x_col_name])
+            else:
+                merged[x_col_name] = merged[x_col_name].fillna(merged[y_col_name])
+
+            # Drop all the _y columns
+            merged.drop([y_col_name], inplace=True, axis=1)
+
+            # Rename all the _x columns by removing the _x
+            merged.rename(columns={x_col_name: plain_col_name}, inplace=True)
+        
+        # Drop the _merge column
+        merged.drop(['_merge'], inplace=True, axis=1)
+
+        # Sort the final result according to when the issue was detected and the date, descending
+        merged.sort_values(by=['dateIssueDetected', 'date'], ascending=False, inplace=True)
+
+        # Save the updated dataframe
+        retrySave(merged, saveLocation)
+    
+    else:
+
+        # Sort by date descending
+        issuesDf.sort_values(by='date', ascending=False, inplace=True)
+
+        # Save the new dataframe
+        retrySave(issuesDf, saveLocation)
 
 
 if __name__ == "__main__":
