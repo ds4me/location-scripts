@@ -173,7 +173,7 @@ def main():
         merged = pd.merge(oldIssuesDf, issuesDf, on='identifier', how='outer', indicator=True)
 
         # Print some summary statistics about the newly pulled data
-        print(f'Fixed issues since last run: {len(merged[merged._merge == "left_only" & merged.fixed_x == False])}')
+        print(f'Fixed issues since last run: {len(merged[(merged._merge == "left_only") & (merged.fixed_x == False)])}')
         print(f'New issues since last run: {len(merged[merged._merge == "right_only"])}')
 
         # Set the fixed value to true - use fixed_x to ensure it won't be overwritten in the loop below
