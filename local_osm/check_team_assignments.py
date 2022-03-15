@@ -10,7 +10,7 @@ import collections
 from datetime import datetime
 import sys
 import numpy as np
-from sqlalchemy import asc
+from sqlalchemy import asc, true
 
 
 # Create the requests session with retries and backoff
@@ -43,10 +43,42 @@ def print_same_line(output):
 
 
 def retrySave(df, saveLocation):
+
     try:
-        df.to_excel(saveLocation, index=False)
+        # Create an Excel writer
+        writer = pd.ExcelWriter(saveLocation, engine='xlsxwriter')
+
+        # Convert the dataframe into an XlsxWriter object
+        df.to_excel(writer, sheet_name='Sheet1', index=False)
+
+        # Create teh workbook and worksheet objects
+        workbook = writer.book
+        worksheet = writer.sheets['Sheet1']
+
+        # Get the dimensions of the dataframe
+        (max_row, max_col) = df.shape
+
+        # Make the columns slightly wider for legibility
+        worksheet.set_column(0, max_col -1, 18)
+
+        # Setup the autofilter
+        worksheet.autofilter(0,0,max_row, max_col - 1)
+
+        # Filter the last column, which should be 'fixed', to show only those with outstanding issues
+        # Note that you have to apply the filter and hide the columns here
+        worksheet.filter_column(max_col - 1, 'fixed == False')    
+        for row_num in (df.index[(df['fixed'] == True)].tolist()):
+            worksheet.set_row(row_num + 1, options={'hidden': True})
+
+        # Try to save the file
+        writer.save()
+        # df.to_excel(saveLocation, index=False)
+
+        # Print some data about the saved file
         print(f'{len(df[df.fixed == False])} outstanding team assignment issues found! -  draft: {len(df[(df.fixed == False) & (df.status == "draft")])}, active: {len(df[(df.fixed == False) & (df.status == "active")])}, complete: {len(df[(df.fixed == False) & (df.status == "complete")])}, retired: {len(df[(df.fixed == False) & (df.status == "retired")])}')
         print(f'Futher details can be found in the following file: {saveLocation}')
+    
+    # Catch permissions errors in case that the file is open and allow for retries
     except PermissionError:
         print('The file appears to be open on your computer. Close it and try again?')
         retry = None
