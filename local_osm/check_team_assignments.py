@@ -66,7 +66,7 @@ def retrySave(df, saveLocation):
 
         # Filter the last column, which should be 'fixed', to show only those with outstanding issues
         # Note that you have to apply the filter and hide the columns here
-        worksheet.filter_column(max_col - 1, 'fixed == False')    
+        worksheet.filter_column(max_col - 1, 'fixed == False')
         for row_num in (df.index[(df['fixed'] == True)].tolist()):
             worksheet.set_row(row_num + 1, options={'hidden': True})
 
