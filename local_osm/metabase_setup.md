@@ -7,10 +7,10 @@ docker network create --subnet=172.20.0.0/16 fortinet
 
 Then, start the VPN with the necessary credentials:
 ```console
-docker run -it -d --restart unless-stopped --privileged  --net fortinet --ip 172.20.0.2 \
+docker run -it -d --restart unless-stopped --privileged --net fortinet --ip 172.20.0.2 \
   -e VPNADDR=<vpn address> \
   -e VPNUSER=<vpn user> \
-  -e VPNPASS<vpn password> \
+  -e VPNPASS=<vpn password> \
   -e VPNTIMEOUT=60 \
   --name vpn auchandirect/forticlient
 ```
