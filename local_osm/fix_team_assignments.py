@@ -9,6 +9,10 @@ import json
 from datetime import datetime, timedelta
 import math
 import ast
+from sqlalchemy import create_engine
+from urllib.parse import quote_plus
+import sqlalchemy
+from sqlalchemy import exc
 
 
 """
@@ -16,12 +20,12 @@ import ast
     "check_team_assignments.py" script and tries to set the correct team assignments
     through the OpenSRP API endpoint based on team assignments pulled from Metabase. 
 
-    Note that the script will fail for plans that have an infinite end date in the 
-    OpenSRP database. To fix this, the team assignments must be manually deleted
-    from the OpenSRP server (192.168.100.27) in the PostgreSQL table
-    opensrp.team.organization_location. This is because that table has a constraint
-    on the duration column that prevents overlapping durations. Why durations occasionally
-    have an infinite end date is still unknown.
+    Note that an active FortiClient VPN connection is a requirement if there are
+    any complete plans with team assignment issues. This is due to a bug in OpenSRP
+    where complete plans have no end date. Because the team assignments table has a 
+    constraint on the duration column that prevents overlapping durations, no new team
+    assignments can be assigned unless the team assignments are manually deleted and
+    recreated which is handled automatically by the script.
 """
 
 
@@ -81,12 +85,19 @@ def main():
     # dfEmpty = df[df.api == '[]']
     # dfEmpty = dfEmpty.reset_index()
 
-
+    # If any of the team assignment issues are for completed plans, connect to the OpenSRP database
+    if any(df.status == 'complete'):
+        usr = config['canopy']['username']
+        pwd = config['canopy']['password']
+        svr = config['canopy']['server']
+        db = config['canopy']['database']
+        engine_string = f'postgresql+psycopg2://{usr}:{quote_plus(pwd)}@{svr}/{db}'
+        canopy = create_engine(engine_string)
 
     # Loop through the dataframe and push new assignments
     for index, row in df.iterrows():
 
-        print(f'{index + 1}/{len(df)}: fixing team assignments for planID {row.identifier} with status {row.status}')
+        print(f'{index + 1}/{len(df)}: Fixing team assignments for planID {row.identifier} with status {row.status}...')
 
         # Evaluate the rows into Python lists
         correctNamedAssignments = ast.literal_eval(row.correct)
@@ -106,6 +117,23 @@ def main():
         # Create the team assignment JSON
         j = create_team_assignment_json(idAssignments, row.identifier, row.jurisdiction, fromDate, toDate)
         # print(json.dumps(j, indent=2))
+
+        # For complete plans, manually delete the team assignments from OpenSRP before proceeding
+        if(row.status == 'complete'):
+            sql = f'''
+                delete from team.organization_location
+                where id in (
+                    select team.organization_location.id
+                    from team.organization_location
+                    left join core.plan on core.plan.id = team.organization_location.plan_id
+                    where identifier = '{row.identifier}'
+                )
+            '''
+            try:
+                canopy.execute(sql)
+            except exc.SQLAlchemyError:
+                print('    Failed to connect to OpenSRP database. Is the FortiClient VPN connected?')
+
 
         assignUrl = 'https://servermhealth.ddc.moph.go.th/opensrp/rest/organization/assignLocationsAndPlans'
         r = retrySession.post(assignUrl, json=j, headers=revealHeaders)
