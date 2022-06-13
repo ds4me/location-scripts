@@ -79,3 +79,33 @@ Once there, I searched to make sure that the "metabase-data" folder I attached w
 ```console
 java -jar /app/metabase.jar load-from-h2 /path/to/metabase.db
 ```
+
+## Updating Metabase versions
+The following commands can be used to upgrade an already running Metabase instance on Docker. The Metabase documentation for this process can be found here: https://www.metabase.com/docs/latest/operations-guide/upgrading-metabase.html#upgrading-the-docker-image
+
+First, pull the latest Metabase docker image:
+```console
+docker pull metabase/metabase:latest
+```
+
+Stop the running instance (named 'metabase' here):
+```console
+docker stop metabase
+```
+
+Remove the container:
+```console
+docker rm metabase
+```
+
+Recreate the container:
+```console
+docker run -d -p 3000:3000 --restart unless-stopped --net fortinet \
+  -e "MB_DB_TYPE=postgres" \
+  -e "MB_DB_DBNAME=metabase" \
+  -e "MB_DB_PORT=5432" \
+  -e "MB_DB_USER=<username>" \
+  -e "MB_DB_PASS=<password>" \
+  -e "MB_DB_HOST=<database host>" \
+  --name metabase metabase/metabase
+```
