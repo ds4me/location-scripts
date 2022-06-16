@@ -303,7 +303,6 @@ def check_hierarchy(gdf, rgdf):
             raise TypeError(f'Please add in the following hierarchy members manually before trying again: {", ".join(missing)}')
 
 
-
 def check_overlaps(gdf, rgdf):
     print('\nChecking for self overlaps...' if gdf.equals(rgdf) else 'Checking for overlaps with current Reveal foci...')
 
@@ -362,6 +361,7 @@ def check_overlaps(gdf, rgdf):
     singleLineOverlaps = "\n".join(map(str, overlaps))
     print("No overlaps!") if len(overlaps) == 0 else print(f'Fix the following {len(overlaps)} overlapping foci: \n{singleLineOverlaps}')
     print()
+
 
 def get_oauth_token(config, server):
     token_url = config[f'{server}_reveal']['token_url']
@@ -439,6 +439,8 @@ def create_reveal_feature(token, feat, baseUrl):
 def update_reveal_feature_geometry(token, feat, baseUrl):
     location = get_location(token, feat["properties"]["externalId"], baseUrl)
     location["geometry"] = feat['geometry']
+    location['properties']['name'] = feat['properties']['name']
+    print(location)
     return [location]
 
 
